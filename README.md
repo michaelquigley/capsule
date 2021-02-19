@@ -25,3 +25,5 @@ Initially the `capsule` framework will provide transpiler tooling to create caps
 ## Capsule Browser
 
 Longer term, it might be useful to create a `capsule`-based browser stack, and corresponding network layer. This approach would be similar to what [Gemini][gemini] has done. In the `capsule` universe, the structural directives end up dovetailing with the capabilities in these browsers, such that the users of capsules have more ultimate control over the layout and presentation of the content. The structural directives capture the semantics of the presentation, and the browser can provide extensive additional capabilities on top of those semantics.
+
+[gemini]: https://gemini.circumlunar.space/
