@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io/fs"
 	"os"
+	"path/filepath"
 )
 
 type Model struct {
@@ -34,18 +35,30 @@ type Property struct {
 //
 func Parse(srcPath string) (*Model, error) {
 	srcFs := os.DirFS(srcPath)
-	if err := fs.WalkDir(srcFs, ".", parseVisitor); err != nil {
+
+	// Inventory sources
+	pv := &parseVisitor{make(map[string]*Node)}
+	if err := fs.WalkDir(srcFs, ".", pv.visit); err != nil {
 		return nil, errors.Wrap(err, "parse error")
 	}
+
 	return nil, nil
 }
 
-func parseVisitor(path string, d fs.DirEntry, err error) error {
+type parseVisitor struct {
+	index map[string]*Node
+}
+
+func (pv *parseVisitor) visit(path string, d fs.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
 	if !d.IsDir() {
-		logrus.Infof("'%v'", path)
+		dir, err := filepath.Abs(filepath.Dir(path))
+		if err != nil {
+			return errors.Wrap(err, "absolute")
+		}
+		logrus.Infof("%v:(%v)", dir, filepath.Base(path))
 	}
 	return nil
 }
