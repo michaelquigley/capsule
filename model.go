@@ -1,12 +1,15 @@
 package capsule
 
 import (
+	"github.com/michaelquigley/cf"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"io/fs"
 	"os"
 	"path/filepath"
 )
+
+const capsuleVersion = "v1"
 
 type Model struct {
 	SrcPath string
@@ -44,6 +47,15 @@ type Property struct {
 func Parse(srcPath string) (*Model, error) {
 	srcFs := os.DirFS(srcPath)
 
+	// Load capsule metadata
+	c, err := loadCapsule(filepath.Join(srcPath, ".capsule"))
+	if err != nil {
+		return nil, err
+	}
+	if c.Version != capsuleVersion {
+		return nil, errors.Errorf("invalid capsule version '%v', expected '%v'", c.Version, capsuleVersion)
+	}
+
 	// Inventory sources
 	pv := &parseVisitor{make(map[string]*Node)}
 	if err := fs.WalkDir(srcFs, ".", pv.visit); err != nil {
@@ -51,6 +63,14 @@ func Parse(srcPath string) (*Model, error) {
 	}
 
 	return nil, nil
+}
+
+func loadCapsule(capsulePath string) (*Capsule, error) {
+	c := &Capsule{}
+	if err := cf.BindYaml(c, capsulePath, cf.DefaultOptions()); err != nil {
+		return nil, errors.Wrapf(err, "load capsule path '%v'", capsulePath)
+	}
+	return c, nil
 }
 
 type parseVisitor struct {
