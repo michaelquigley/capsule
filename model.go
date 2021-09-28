@@ -44,20 +44,29 @@ type Property struct {
 
 // Parse a source path into a Model.
 //
-func Parse(srcPath string) (*Model, error) {
+func Parse(srcPath string) (model *Model, err error) {
+	srcPath, err = filepath.Abs(srcPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "make path absolute '%v'", srcPath)
+	}
 	srcFs := os.DirFS(srcPath)
+	logrus.Infof("srcPath = '%v'", srcPath)
+
+	model = &Model{
+		SrcPath: srcPath,
+	}
 
 	// Load capsule metadata
-	c, err := loadCapsule(filepath.Join(srcPath, ".capsule"))
+	model.Capsule, err = loadCapsule(filepath.Join(srcPath, ".capsule"))
 	if err != nil {
 		return nil, err
 	}
-	if c.Version != capsuleVersion {
-		return nil, errors.Errorf("invalid capsule version '%v', expected '%v'", c.Version, capsuleVersion)
+	if model.Capsule.Version != capsuleVersion {
+		return nil, errors.Errorf("invalid capsule version '%v', expected '%v'", model.Capsule.Version, capsuleVersion)
 	}
 
 	// Inventory sources
-	pv := &parseVisitor{make(map[string]*Node)}
+	pv := &parseVisitor{srcPath, make(map[string]*Node)}
 	if err := fs.WalkDir(srcFs, ".", pv.visit); err != nil {
 		return nil, errors.Wrap(err, "parse error")
 	}
@@ -74,19 +83,29 @@ func loadCapsule(capsulePath string) (*Capsule, error) {
 }
 
 type parseVisitor struct {
-	index map[string]*Node
+	srcPath string
+	index   map[string]*Node
 }
 
 func (pv *parseVisitor) visit(path string, d fs.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
-	if !d.IsDir() {
-		dir, err := filepath.Abs(filepath.Dir(path))
-		if err != nil {
-			return errors.Wrap(err, "absolute")
-		}
+
+	dir, err := filepath.Abs(filepath.Dir(path))
+	if err != nil {
+		return errors.Wrapf(err, "make '%v' absolute", path)
+	}
+	dir, err = filepath.Rel(pv.srcPath, dir)
+	if err != nil {
+		return errors.Wrapf(err, "make '%v' relative", dir)
+	}
+
+	if d.IsDir() {
+		logrus.Infof("%v", dir)
+	} else {
 		logrus.Infof("%v:(%v)", dir, filepath.Base(path))
 	}
+
 	return nil
 }
