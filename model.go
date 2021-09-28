@@ -21,9 +21,15 @@ type Node struct {
 	Children   []*Node
 }
 
+// Capsule is the data structure that describes the "structural directives" describing the contents of the capsule.
+//
 type Capsule struct {
-	Version   string
-	Structure string
+	Version string
+
+	// Structure is an array of structure definitions, which describe how to create the content model from the objects
+	// nested below this folder.
+	//
+	Structure []interface{}
 }
 
 type Property struct {
