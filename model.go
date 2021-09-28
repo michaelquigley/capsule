@@ -88,7 +88,8 @@ func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
 
 	dir := filepath.Dir(path)
 
-	if de.IsRegular() {
+	if de.IsDir() {
+		// Empty directories
 		node, found := pv.index[dir]
 		if !found {
 			node = &Node{
@@ -96,18 +97,30 @@ func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
 			}
 			pv.index[dir] = node
 		}
-		prop := &Property{Name: filepath.Base(path)}
-		typeId, typeFound := pv.cfg.PropertyType(path, de)
-		if typeFound {
-			prop.Type = typeId
+	} else if de.IsRegular() {
+		if filepath.Base(path) != ".capsule" {
+			node, found := pv.index[dir]
+			if !found {
+				node = &Node{
+					Path: dir,
+				}
+				pv.index[dir] = node
+			}
+			prop := &Property{Name: filepath.Base(path)}
+			typeId, typeFound := pv.cfg.PropertyType(path, de)
+			if typeFound {
+				prop.Type = typeId
+			}
+			node.Properties = append(node.Properties, prop)
 		}
-		node.Properties = append(node.Properties, prop)
 	}
 
 	return nil
 }
 
 func linkNodes(index map[string]*Node) *Node {
+	logrus.Infof("index = %v", index)
+
 	var root *Node
 	for _, node := range index {
 		parent, found := index[filepath.Dir(node.Path)]
