@@ -1,11 +1,9 @@
 package capsule
 
 import (
+	"github.com/karrick/godirwalk"
 	"github.com/michaelquigley/cf"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-	"io/fs"
-	"os"
 	"path/filepath"
 )
 
@@ -45,13 +43,6 @@ type Property struct {
 // Parse a source path into a Model.
 //
 func Parse(srcPath string) (model *Model, err error) {
-	srcPath, err = filepath.Abs(srcPath)
-	if err != nil {
-		return nil, errors.Wrapf(err, "make path absolute '%v'", srcPath)
-	}
-	srcFs := os.DirFS(srcPath)
-	logrus.Infof("srcPath = '%v'", srcPath)
-
 	model = &Model{
 		SrcPath: srcPath,
 	}
@@ -67,11 +58,11 @@ func Parse(srcPath string) (model *Model, err error) {
 
 	// Inventory sources
 	pv := &parseVisitor{srcPath, make(map[string]*Node)}
-	if err := fs.WalkDir(srcFs, ".", pv.visit); err != nil {
+	if err := godirwalk.Walk(srcPath, &godirwalk.Options{Callback: pv.visit, Unsorted: true}); err != nil {
 		return nil, errors.Wrap(err, "parse error")
 	}
 
-	return nil, nil
+	return model, nil
 }
 
 func loadCapsule(capsulePath string) (*Capsule, error) {
@@ -87,24 +78,18 @@ type parseVisitor struct {
 	index   map[string]*Node
 }
 
-func (pv *parseVisitor) visit(path string, d fs.DirEntry, err error) error {
-	if err != nil {
-		return err
-	}
+func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
+	dir := filepath.Dir(path)
 
-	dir, err := filepath.Abs(filepath.Dir(path))
-	if err != nil {
-		return errors.Wrapf(err, "make '%v' absolute", path)
-	}
-	dir, err = filepath.Rel(pv.srcPath, dir)
-	if err != nil {
-		return errors.Wrapf(err, "make '%v' relative", dir)
-	}
-
-	if d.IsDir() {
-		logrus.Infof("%v", dir)
-	} else {
-		logrus.Infof("%v:(%v)", dir, filepath.Base(path))
+	if de.IsRegular() {
+		node, found := pv.index[dir]
+		if !found {
+			node = &Node{
+				Path: dir,
+			}
+			pv.index[dir] = node
+		}
+		node.Properties = append(node.Properties, &Property{Name: filepath.Base(path)})
 	}
 
 	return nil

@@ -3,7 +3,8 @@ module github.com/michaelquigley/capsule
 go 1.16
 
 require (
-	github.com/michaelquigley/cf v0.0.4 // indirect
+	github.com/karrick/godirwalk v1.16.1
+	github.com/michaelquigley/cf v0.0.4
 	github.com/michaelquigley/pfxlog v0.6.1
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
