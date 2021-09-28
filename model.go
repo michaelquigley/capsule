@@ -4,6 +4,7 @@ import (
 	"github.com/karrick/godirwalk"
 	"github.com/michaelquigley/cf"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"path/filepath"
 )
 
@@ -42,7 +43,7 @@ type Property struct {
 
 // Parse a source path into a Model.
 //
-func Parse(srcPath string) (model *Model, err error) {
+func Parse(srcPath string, cfg *Config) (model *Model, err error) {
 	model = &Model{
 		SrcPath: srcPath,
 	}
@@ -57,7 +58,7 @@ func Parse(srcPath string) (model *Model, err error) {
 	}
 
 	// Inventory sources
-	pv := &parseVisitor{srcPath, make(map[string]*Node)}
+	pv := &parseVisitor{cfg, srcPath, make(map[string]*Node)}
 	if err := godirwalk.Walk(srcPath, &godirwalk.Options{Callback: pv.visit, Unsorted: true}); err != nil {
 		return nil, errors.Wrap(err, "parse error")
 	}
@@ -77,11 +78,14 @@ func loadCapsule(capsulePath string) (*Capsule, error) {
 }
 
 type parseVisitor struct {
+	cfg     *Config
 	srcPath string
 	index   map[string]*Node
 }
 
 func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
+	logrus.Infof("visiting '%v'", path)
+
 	dir := filepath.Dir(path)
 
 	if de.IsRegular() {
@@ -92,7 +96,12 @@ func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
 			}
 			pv.index[dir] = node
 		}
-		node.Properties = append(node.Properties, &Property{Name: filepath.Base(path)})
+		prop := &Property{Name: filepath.Base(path)}
+		typeId, typeFound := pv.cfg.PropertyType(path, de)
+		if typeFound {
+			prop.Type = typeId
+		}
+		node.Properties = append(node.Properties, prop)
 	}
 
 	return nil

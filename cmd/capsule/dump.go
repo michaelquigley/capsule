@@ -24,7 +24,7 @@ func dump(_ *cobra.Command, args []string) {
 	if len(args) > 0 {
 		srcPath = args[0]
 	}
-	model, err := capsule.Parse(srcPath)
+	model, err := capsule.Parse(srcPath, capsule.DefaultConfig())
 	if err != nil {
 		logrus.Fatal(err)
 	}
