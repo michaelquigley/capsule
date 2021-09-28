@@ -62,6 +62,9 @@ func Parse(srcPath string) (model *Model, err error) {
 		return nil, errors.Wrap(err, "parse error")
 	}
 
+	// Link
+	model.Root = linkNodes(pv.index)
+
 	return model, nil
 }
 
@@ -93,4 +96,20 @@ func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
 	}
 
 	return nil
+}
+
+func linkNodes(index map[string]*Node) *Node {
+	var root *Node
+	for _, node := range index {
+		parent, found := index[filepath.Dir(node.Path)]
+		if !found {
+			root = node
+			root.Path = "."
+		} else {
+			node.Parent = parent
+			parent.Children = append(parent.Children, node)
+			node.Path = filepath.Base(node.Path)
+		}
+	}
+	return root
 }
