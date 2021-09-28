@@ -10,26 +10,28 @@ import (
 
 type Model struct {
 	SrcPath string
+	Capsule *Capsule
 	Root    *Node
 }
 
 type Node struct {
 	Path       string
-	Capsule    *Capsule
+	Structure  []*Structure
 	Properties []*Property
 	Parent     *Node
 	Children   []*Node
 }
 
-// Capsule is the data structure that describes the "structural directives" describing the contents of the capsule.
+// Capsule metadata
 //
 type Capsule struct {
 	Version string
+}
 
-	// Structure is an array of structure definitions, which describe how to create the content model from the objects
-	// nested below this folder.
-	//
-	Structure []interface{}
+// Structure definition
+//
+type Structure struct {
+	Models []interface{}
 }
 
 type Property struct {
