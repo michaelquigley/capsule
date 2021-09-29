@@ -2,6 +2,7 @@ package capsule
 
 import (
 	"fmt"
+	"reflect"
 )
 
 // Dump the logical contents of a Model for debugging and inspection.
@@ -21,7 +22,14 @@ func Dump(model *Model) string {
 
 func dumpNode(i int, node *Node) string {
 	space := level(i)
-	out := fmt.Sprintf("%s[%s]:\n", space, node.Path)
+	out := fmt.Sprintf("%s%s/\n", space, node.Path)
+	for _, s := range node.Structure {
+		for _, m := range s.Models {
+			if m != nil {
+				out += fmt.Sprintf("%s\t<%v>\n", space, reflect.TypeOf(m))
+			}
+		}
+	}
 	for _, f := range node.Features {
 		out += fmt.Sprintf("%s\t%v (%v)\n", space, f.Name, f.Type)
 	}
