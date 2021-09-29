@@ -31,12 +31,6 @@ type Capsule struct {
 	Version string
 }
 
-// Structure definition
-//
-type Structure struct {
-	Models []interface{}
-}
-
 type Feature struct {
 	Name string
 	Type string
