@@ -22,8 +22,8 @@ func Dump(model *Model) string {
 func dumpNode(i int, node *Node) string {
 	space := level(i)
 	out := fmt.Sprintf("%s[%s]:\n", space, node.Path)
-	for _, p := range node.Properties {
-		out += fmt.Sprintf("%s\t%v (%v)\n", space, p.Name, p.Type)
+	for _, f := range node.Features {
+		out += fmt.Sprintf("%s\t%v (%v)\n", space, f.Name, f.Type)
 	}
 	out += "\n"
 	for _, child := range node.Children {

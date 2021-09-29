@@ -17,11 +17,11 @@ type Model struct {
 }
 
 type Node struct {
-	Path       string
-	Structure  []*Structure
-	Properties []*Property
-	Parent     *Node
-	Children   []*Node
+	Path      string
+	Structure []*Structure
+	Features  []*Feature
+	Parent    *Node
+	Children  []*Node
 }
 
 // Capsule metadata
@@ -36,7 +36,7 @@ type Structure struct {
 	Models []interface{}
 }
 
-type Property struct {
+type Feature struct {
 	Name string
 	Type string
 }
@@ -106,12 +106,12 @@ func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
 				}
 				pv.index[dir] = node
 			}
-			prop := &Property{Name: filepath.Base(path)}
+			f := &Feature{Name: filepath.Base(path)}
 			typeId, typeFound := pv.cfg.PropertyType(path, de)
 			if typeFound {
-				prop.Type = typeId
+				f.Type = typeId
 			}
-			node.Properties = append(node.Properties, prop)
+			node.Features = append(node.Features, f)
 		}
 	}
 
