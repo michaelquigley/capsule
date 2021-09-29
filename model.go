@@ -101,12 +101,23 @@ func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
 				}
 				pv.index[dir] = node
 			}
-			f := &Feature{Name: filepath.Base(path)}
-			typeId, typeFound := pv.cfg.PropertyType(path, de)
-			if typeFound {
-				f.Type = typeId
+
+			if filepath.Base(path) != ".structure" {
+				f := &Feature{Name: filepath.Base(path)}
+				typeId, typeFound := pv.cfg.PropertyType(path, de)
+				if typeFound {
+					f.Type = typeId
+				}
+				node.Features = append(node.Features, f)
+
+			} else {
+				s, err := LoadStructure(path)
+				if err != nil {
+					return err
+				}
+				node.Structure = append(node.Structure, s)
+				logrus.Infof("added structure '%v'", path)
 			}
-			node.Features = append(node.Features, f)
 		}
 	}
 
