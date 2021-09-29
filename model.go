@@ -11,9 +11,10 @@ import (
 const capsuleVersion = "v1"
 
 type Model struct {
-	SrcPath string
-	Capsule *Capsule
-	Root    *Node
+	SrcPath   string
+	Capsule   *Capsule
+	Root      *Node
+	Structure map[string]interface{}
 }
 
 type Node struct {
