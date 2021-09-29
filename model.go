@@ -4,7 +4,6 @@ import (
 	"github.com/karrick/godirwalk"
 	"github.com/michaelquigley/cf"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"path/filepath"
 )
 
@@ -79,8 +78,6 @@ type parseVisitor struct {
 }
 
 func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
-	logrus.Infof("visiting '%v'", path)
-
 	dir := filepath.Dir(path)
 
 	if de.IsDir() {
@@ -116,7 +113,6 @@ func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
 					return err
 				}
 				node.Structure = append(node.Structure, s)
-				logrus.Infof("added structure '%v'", path)
 			}
 		}
 	}
@@ -125,8 +121,6 @@ func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
 }
 
 func linkNodes(index map[string]*Node) *Node {
-	logrus.Infof("index = %v", index)
-
 	var root *Node
 	for _, node := range index {
 		parent, found := index[filepath.Dir(node.Path)]
