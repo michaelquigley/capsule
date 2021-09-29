@@ -5,9 +5,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// StructuralDefinition is a strategy that is used to build structure from a Node tree.
+// StructuralDirective is a strategy that is used to build structure from a Node tree.
 //
-type StructuralDefinition interface {
+type StructuralDirective interface {
 	Build(*Node, map[string]interface{}) error
 }
 
@@ -23,7 +23,7 @@ func LoadStructure(path string) (*Structure, error) {
 	return s, nil
 }
 
-// Structure definition
+// Structure model
 //
 type Structure struct {
 	Models []interface{}
