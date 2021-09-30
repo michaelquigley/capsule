@@ -28,9 +28,3 @@ func LoadStructure(path string) (*Structure, error) {
 type Structure struct {
 	Models []interface{}
 }
-
-type TimelineStructure struct{}
-
-func (ts *TimelineStructure) Build(n *Node, structure map[string]interface{}) error {
-	return nil
-}

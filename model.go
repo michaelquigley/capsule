@@ -5,6 +5,7 @@ import (
 	"github.com/michaelquigley/cf"
 	"github.com/pkg/errors"
 	"path/filepath"
+	"reflect"
 )
 
 const capsuleVersion = "v1"
@@ -16,12 +17,43 @@ type Model struct {
 	Structure map[string]interface{}
 }
 
+func (model *Model) Build() error {
+	if err := model.buildStructureFor(model.Root); err != nil {
+		return errors.Wrap(err, "error building structure")
+	}
+	return nil
+}
+
+func (model *Model) buildStructureFor(n *Node) error {
+	for _, child := range n.Children {
+		if err := model.buildStructureFor(child); err != nil {
+			return errors.Wrapf(err, "error building structure for '%v'", child.FullPath())
+		}
+	}
+	for _, structure := range n.Structure {
+		for _, sm := range structure.Models {
+			if err := sm.(StructuralDirective).Build(n, model.Structure); err != nil {
+				return errors.Wrapf(err, "error running structural directive '%v' for '%v'", reflect.TypeOf(sm).Name(), n.FullPath())
+			}
+		}
+	}
+	return nil
+}
+
 type Node struct {
 	Path      string
 	Structure []*Structure
 	Features  []*Feature
 	Parent    *Node
 	Children  []*Node
+}
+
+func (n *Node) FullPath() string {
+	if n.Parent != nil {
+		return filepath.Join(n.Parent.FullPath(), n.Path)
+	} else {
+		return n.Path
+	}
 }
 
 // Capsule metadata
