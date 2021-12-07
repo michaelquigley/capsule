@@ -33,11 +33,11 @@ type PropertyTypeHandler func(string, *godirwalk.Dirent) (string, bool)
 func FileExtensionPropertyType(path string, de *godirwalk.Dirent) (string, bool) {
 	switch strings.ToLower(filepath.Ext(path)) {
 	case ".md":
-		return "story/markdown", true
+		return "story; markdown", true
 	case ".png":
-		return "figure/png", true
+		return "figure; png", true
 	case ".jpg":
-		return "figure/jpeg", true
+		return "figure; jpeg", true
 	default:
 		return "unknown", true
 	}
