@@ -1,7 +1,7 @@
 package capsule
 
 import (
-	"github.com/karrick/godirwalk"
+	"io/fs"
 	"path/filepath"
 	"strings"
 )
@@ -14,7 +14,7 @@ func DefaultConfig() *Config {
 	}
 }
 
-func (cfg *Config) PropertyType(path string, de *godirwalk.Dirent) (string, bool) {
+func (cfg *Config) PropertyType(path string, de fs.DirEntry) (string, bool) {
 	for _, handler := range cfg.TypeHandlers {
 		typeId, found := handler(path, de)
 		if found {
@@ -28,9 +28,9 @@ type Config struct {
 	TypeHandlers []PropertyTypeHandler
 }
 
-type PropertyTypeHandler func(string, *godirwalk.Dirent) (string, bool)
+type PropertyTypeHandler func(string, fs.DirEntry) (string, bool)
 
-func FileExtensionPropertyType(path string, de *godirwalk.Dirent) (string, bool) {
+func FileExtensionPropertyType(path string, de fs.DirEntry) (string, bool) {
 	switch strings.ToLower(filepath.Ext(path)) {
 	case ".md":
 		return "story; markdown", true

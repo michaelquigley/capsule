@@ -1,9 +1,11 @@
 package capsule
 
 import (
-	"github.com/karrick/godirwalk"
 	"github.com/michaelquigley/cf"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"io/fs"
+	"os"
 	"path/filepath"
 )
 
@@ -25,7 +27,7 @@ func Parse(srcPath string, cfg *Config) (model *Model, err error) {
 
 	// Inventory sources
 	pv := &parseVisitor{cfg, srcPath, make(map[string]*Node)}
-	if err := godirwalk.Walk(srcPath, &godirwalk.Options{Callback: pv.visit, Unsorted: true}); err != nil {
+	if err := fs.WalkDir(os.DirFS(srcPath), ".", pv.visit); err != nil {
 		return nil, errors.Wrap(err, "parse error")
 	}
 
@@ -49,8 +51,13 @@ type parseVisitor struct {
 	index   map[string]*Node
 }
 
-func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
-	dir := filepath.Dir(path)
+func (pv *parseVisitor) visit(path string, de fs.DirEntry, err error) error {
+	if err != nil {
+		return err
+	}
+
+	dir := filepath.ToSlash(filepath.Join(pv.srcPath, filepath.Dir(path)))
+	path = filepath.ToSlash(filepath.Join(pv.srcPath, path))
 
 	if de.IsDir() {
 		// Empty directories
@@ -61,7 +68,7 @@ func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
 			}
 			pv.index[dir] = node
 		}
-	} else if de.IsRegular() {
+	} else {
 		if filepath.Base(path) != ".capsule" {
 			node, found := pv.index[dir]
 			if !found {
@@ -69,6 +76,7 @@ func (pv *parseVisitor) visit(path string, de *godirwalk.Dirent) error {
 					Path: dir,
 				}
 				pv.index[dir] = node
+				logrus.Infof("node: %v", dir)
 			}
 
 			if filepath.Base(path) != ".structure" {
