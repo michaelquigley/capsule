@@ -8,9 +8,13 @@ import (
 	"path/filepath"
 )
 
-// Parse a source path into a Model.
-//
 func Parse(srcPath string, cfg *Config) (model *Model, err error) {
+	srcPath, err = filepath.Abs(srcPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error making src path '%v' absolute", srcPath)
+	}
+	srcPath = filepath.ToSlash(srcPath)
+
 	model = &Model{
 		SrcPath: srcPath,
 	}
