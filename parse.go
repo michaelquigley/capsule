@@ -3,7 +3,6 @@ package capsule
 import (
 	"github.com/michaelquigley/cf"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -65,7 +64,6 @@ func (pv *parseVisitor) visit(path string, de fs.DirEntry, err error) error {
 			Path: dir,
 		}
 		pv.index[dir] = node
-		logrus.Infof("pv.index[%v] = %v", dir, node)
 	}
 
 	if !de.IsDir() {
