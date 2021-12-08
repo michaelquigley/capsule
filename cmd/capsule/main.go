@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	o := pfxlog.DefaultOptions().SetTrimPrefix("github.com/michaelquigley/")
+	o := pfxlog.DefaultOptions().SetTrimPrefix("github.com/michaelquigley/").Color()
 	pfxlog.GlobalInit(logrus.InfoLevel, o)
 	logrus.SetFormatter(pfxlog.NewFormatter(o)) // Always formatted output
 }

@@ -30,7 +30,7 @@ type Config struct {
 
 type PropertyTypeHandler func(string, fs.DirEntry) (string, bool)
 
-func FileExtensionPropertyType(path string, de fs.DirEntry) (string, bool) {
+func FileExtensionPropertyType(path string, _ fs.DirEntry) (string, bool) {
 	switch strings.ToLower(filepath.Ext(path)) {
 	case ".md":
 		return "story; markdown", true

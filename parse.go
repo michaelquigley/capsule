@@ -71,20 +71,13 @@ func (pv *parseVisitor) visit(path string, de fs.DirEntry, err error) error {
 	}
 
 	if !de.IsDir() {
-		if filepath.Base(path) != ".capsule" && filepath.Base(path) != ".structure" {
+		if filepath.Base(path) != ".capsule" {
 			ftr := &Feature{Name: filepath.Base(path)}
 			typeId, typeFound := pv.cfg.PropertyType(path, de)
 			if typeFound {
 				ftr.Type = typeId
 			}
 			node.Features = append(node.Features, ftr)
-		}
-		if filepath.Base(path) == ".structure" {
-			str, err := LoadStructure(path)
-			if err != nil {
-				return err
-			}
-			node.Structure = append(node.Structure, str)
 		}
 	}
 

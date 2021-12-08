@@ -13,7 +13,7 @@ func init() {
 
 var compileCmd = &cobra.Command{
 	Use:     "compile",
-	Short:   "Compile a Capsule",
+	Short:   "compile a capsule into a deployable form",
 	Aliases: []string{"cc"},
 	Args:    cobra.MaximumNArgs(1),
 	Run:     compile,
@@ -24,11 +24,8 @@ func compile(_ *cobra.Command, args []string) {
 	if len(args) > 0 {
 		srcPath = args[0]
 	}
-	model, err := capsule.Parse(srcPath, capsule.DefaultConfig())
+	_, err := capsule.Parse(srcPath, capsule.DefaultConfig())
 	if err != nil {
-		logrus.Fatal(err)
-	}
-	if err := model.Build(); err != nil {
 		logrus.Fatal(err)
 	}
 }
