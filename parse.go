@@ -59,41 +59,30 @@ func (pv *parseVisitor) visit(path string, de fs.DirEntry, err error) error {
 	dir := filepath.ToSlash(filepath.Join(pv.srcPath, filepath.Dir(path)))
 	path = filepath.ToSlash(filepath.Join(pv.srcPath, path))
 
-	if de.IsDir() {
-		// Empty directories
-		node, found := pv.index[dir]
-		if !found {
-			node = &Node{
-				Path: dir,
-			}
-			pv.index[dir] = node
+	node, found := pv.index[dir]
+	if !found {
+		node = &Node{
+			Path: dir,
 		}
-	} else {
-		if filepath.Base(path) != ".capsule" {
-			node, found := pv.index[dir]
-			if !found {
-				node = &Node{
-					Path: dir,
-				}
-				pv.index[dir] = node
-				logrus.Infof("node: %v", dir)
-			}
+		pv.index[dir] = node
+		logrus.Infof("pv.index[%v] = %v", dir, node)
+	}
 
-			if filepath.Base(path) != ".structure" {
-				f := &Feature{Name: filepath.Base(path)}
-				typeId, typeFound := pv.cfg.PropertyType(path, de)
-				if typeFound {
-					f.Type = typeId
-				}
-				node.Features = append(node.Features, f)
-
-			} else {
-				s, err := LoadStructure(path)
-				if err != nil {
-					return err
-				}
-				node.Structure = append(node.Structure, s)
+	if !de.IsDir() {
+		if filepath.Base(path) != ".capsule" && filepath.Base(path) != ".structure" {
+			ftr := &Feature{Name: filepath.Base(path)}
+			typeId, typeFound := pv.cfg.PropertyType(path, de)
+			if typeFound {
+				ftr.Type = typeId
 			}
+			node.Features = append(node.Features, ftr)
+		}
+		if filepath.Base(path) == ".structure" {
+			str, err := LoadStructure(path)
+			if err != nil {
+				return err
+			}
+			node.Structure = append(node.Structure, str)
 		}
 	}
 
@@ -103,7 +92,8 @@ func (pv *parseVisitor) visit(path string, de fs.DirEntry, err error) error {
 func linkNodes(index map[string]*Node) *Node {
 	var root *Node
 	for _, node := range index {
-		parent, found := index[filepath.Dir(node.Path)]
+		parentPath := filepath.ToSlash(filepath.Dir(node.Path))
+		parent, found := index[parentPath]
 		if !found {
 			root = node
 			root.Path = "."
