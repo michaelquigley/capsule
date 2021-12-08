@@ -6,39 +6,55 @@ import (
 	"strings"
 )
 
+type Config struct {
+	AttributeHandlers []AttributeHandler
+}
+
+type AttributeHandler func(string, fs.DirEntry) Attributes
+
 func DefaultConfig() *Config {
 	return &Config{
-		TypeHandlers: []PropertyTypeHandler{
-			FileExtensionPropertyType,
+		AttributeHandlers: []AttributeHandler{
+			filenameClassType,
+			filenameRole,
 		},
 	}
 }
 
-func (cfg *Config) PropertyType(path string, de fs.DirEntry) (string, bool) {
-	for _, handler := range cfg.TypeHandlers {
-		typeId, found := handler(path, de)
-		if found {
-			return typeId, true
+func (cfg *Config) PropertyType(path string, de fs.DirEntry) Attributes {
+	merged := Attributes{}
+	for _, handler := range cfg.AttributeHandlers {
+		attrs := handler(path, de)
+		if attrs.Class != "" {
+			merged.Class = attrs.Class
+		}
+		if attrs.Role != "" {
+			merged.Role = attrs.Role
+		}
+		if attrs.Type != "" {
+			merged.Type = attrs.Type
 		}
 	}
-	return "", false
+	return merged
 }
 
-type Config struct {
-	TypeHandlers []PropertyTypeHandler
+func filenameRole(path string, _ fs.DirEntry) Attributes {
+	base := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+	if base == "story" {
+		return Attributes{Role: "story"}
+	}
+	return Attributes{}
 }
 
-type PropertyTypeHandler func(string, fs.DirEntry) (string, bool)
-
-func FileExtensionPropertyType(path string, _ fs.DirEntry) (string, bool) {
+func filenameClassType(path string, _ fs.DirEntry) Attributes {
 	switch strings.ToLower(filepath.Ext(path)) {
 	case ".md":
-		return "story; markdown", true
+		return Attributes{Class: "document", Type: "markdown"}
 	case ".png":
-		return "figure; png", true
+		return Attributes{Class: "image", Type: "png"}
 	case ".jpg":
-		return "figure; jpeg", true
+		return Attributes{Class: "image", Type: "jpeg"}
 	default:
-		return "unknown", true
+		return Attributes{}
 	}
 }

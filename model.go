@@ -1,13 +1,16 @@
 package capsule
 
-import "path/filepath"
+import (
+	"fmt"
+	"path/filepath"
+)
 
 const capsuleVersion = "v1"
 
 type Model struct {
-	SrcPath   string
-	Capsule   *Capsule
-	Root      *Node
+	SrcPath string
+	Capsule *Capsule
+	Root    *Node
 }
 
 type Capsule struct {
@@ -15,15 +18,21 @@ type Capsule struct {
 }
 
 type Feature struct {
-	Name string
-	Type string
+	Name       string
+	Attributes Attributes
+}
+
+type Attributes struct {
+	Role  string
+	Class string
+	Type  string
 }
 
 type Node struct {
-	Path      string
-	Features  []*Feature
-	Parent    *Node
-	Children  []*Node
+	Path     string
+	Features []*Feature
+	Parent   *Node
+	Children []*Node
 }
 
 func (n *Node) FullPath() string {
@@ -32,4 +41,8 @@ func (n *Node) FullPath() string {
 	} else {
 		return n.Path
 	}
+}
+
+func (self *Attributes) String() string {
+	return fmt.Sprintf("{%v; %v; %v}", self.Role, self.Class, self.Type)
 }

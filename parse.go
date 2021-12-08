@@ -3,6 +3,7 @@ package capsule
 import (
 	"github.com/michaelquigley/cf"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -72,12 +73,12 @@ func (pv *parseVisitor) visit(path string, de fs.DirEntry, err error) error {
 
 	if !de.IsDir() {
 		if filepath.Base(path) != ".capsule" {
-			ftr := &Feature{Name: filepath.Base(path)}
-			typeId, typeFound := pv.cfg.PropertyType(path, de)
-			if typeFound {
-				ftr.Type = typeId
+			ftr := &Feature{
+				Name:       filepath.Base(path),
+				Attributes: pv.cfg.PropertyType(path, de),
 			}
 			node.Features = append(node.Features, ftr)
+			logrus.Infof("'%v': %v", filepath.Base(path), ftr.Attributes.String())
 		}
 	}
 
