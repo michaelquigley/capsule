@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-const capsuleVersion = "v1"
+const capsuleVersion = "v0.1"
 
 type Model struct {
 	SrcPath string

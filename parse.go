@@ -75,7 +75,7 @@ func (pv *parseVisitor) visit(path string, de fs.DirEntry, err error) error {
 		if filepath.Base(path) != ".capsule" {
 			ftr := &Feature{
 				Name:       filepath.Base(path),
-				Attributes: pv.cfg.PropertyType(path, de),
+				Attributes: pv.cfg.GetAttributes(path, de),
 			}
 			node.Features = append(node.Features, ftr)
 			logrus.Infof("'%v': %v", filepath.Base(path), ftr.Attributes.String())

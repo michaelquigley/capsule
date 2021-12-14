@@ -12,16 +12,7 @@ type Config struct {
 
 type AttributeHandler func(string, fs.DirEntry) Attributes
 
-func DefaultConfig() *Config {
-	return &Config{
-		AttributeHandlers: []AttributeHandler{
-			filenameClassType,
-			filenameRole,
-		},
-	}
-}
-
-func (cfg *Config) PropertyType(path string, de fs.DirEntry) Attributes {
+func (cfg *Config) GetAttributes(path string, de fs.DirEntry) Attributes {
 	merged := Attributes{}
 	for _, handler := range cfg.AttributeHandlers {
 		attrs := handler(path, de)
@@ -36,6 +27,15 @@ func (cfg *Config) PropertyType(path string, de fs.DirEntry) Attributes {
 		}
 	}
 	return merged
+}
+
+func DefaultConfig() *Config {
+	return &Config{
+		AttributeHandlers: []AttributeHandler{
+			filenameClassType,
+			filenameRole,
+		},
+	}
 }
 
 func filenameRole(path string, _ fs.DirEntry) Attributes {
