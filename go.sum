@@ -222,6 +222,8 @@ github.com/michaelquigley/cf v0.0.10 h1:7XiVmVftb2OS9wEVw5AU/Cl25H4LbA6rEDwI3DFt
 github.com/michaelquigley/cf v0.0.10/go.mod h1:pqHPDeHlgjX1YCsts89Es4mqeoeeTgXFOE/8q59F5pU=
 github.com/michaelquigley/pfxlog v0.6.1 h1:Ip/5LQchoyFp/MSvdYjFzy6fSsDt2DV4CEl72w/v29g=
 github.com/michaelquigley/pfxlog v0.6.1/go.mod h1:z864Y2uU0O4QA5OoclXIOdoX5Tme2zm66FLAJ+R1jZs=
+github.com/michaelquigley/pfxlog v0.6.9 h1:K/weH6ARu58aEDQi0ccinItvV958CeO6Ri4jqeFwd/w=
+github.com/michaelquigley/pfxlog v0.6.9/go.mod h1:D2vg1tPyPdSXWWkSnGk6Fomwh5b3clwVJDUh71tq8Sk=
 github.com/miekg/dns v1.0.14/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
 github.com/mitchellh/cli v1.0.0/go.mod h1:hNIlj7HEI86fIcpObd7a0FcrxTWetlwJDGcceTlRvqc=
 github.com/mitchellh/go-homedir v1.0.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
