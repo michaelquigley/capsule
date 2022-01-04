@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/michaelquigley/capsule"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -24,8 +25,9 @@ func compile(_ *cobra.Command, args []string) {
 	if len(args) > 0 {
 		srcPath = args[0]
 	}
-	_, err := capsule.Parse(srcPath, capsule.DefaultConfig())
+	mdl, err := capsule.Parse(srcPath, capsule.DefaultConfig())
 	if err != nil {
 		logrus.Fatal(err)
 	}
+	fmt.Println(mdl.Dump())
 }
