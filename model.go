@@ -35,6 +35,10 @@ type Node struct {
 	Children []*Node
 }
 
+type StructuralDirective interface {
+	Build(rootPath string, node *Node, prev interface{}) (interface{}, error)
+}
+
 func (n *Node) FullPath() string {
 	if n.Parent != nil {
 		return filepath.Join(n.Parent.FullPath(), n.Path)
