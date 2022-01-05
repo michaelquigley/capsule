@@ -17,7 +17,8 @@ func Parse(srcPath string, cfg *Config) (model *Model, err error) {
 	srcPath = filepath.ToSlash(srcPath)
 
 	model = &Model{
-		SrcPath: srcPath,
+		SrcPath:    srcPath,
+		Structures: make(map[string]interface{}),
 	}
 
 	// Load capsule metadata
@@ -37,6 +38,11 @@ func Parse(srcPath string, cfg *Config) (model *Model, err error) {
 
 	// Link
 	model.Root = linkNodes(pv.index)
+
+	// load structure models
+	if err := loadStructureModels(model); err != nil {
+		return nil, errors.Wrap(err, "error loading structure models")
+	}
 
 	return model, nil
 }
@@ -106,4 +112,39 @@ func linkNodes(index map[string]*Node) *Node {
 		}
 	}
 	return root
+}
+
+func loadStructureModels(model *Model) error {
+	return loadStructureModelsVisit(".", model.Root, model)
+}
+
+func loadStructureModelsVisit(path string, node *Node, model *Model) error {
+	for _, feat := range node.Features {
+		if feat.Name == ".structure" {
+			if def, ok := feat.Object.(*StructureDef); ok {
+				logrus.Infof("running structure builders for '%v'", filepath.Join(path, node.Path))
+				for _, smdl := range def.Models {
+					if bldr, ok := smdl.Builder.(StructureBuilder); ok {
+						var prev []string
+						if v, found := model.Structures[smdl.Id]; found {
+							prev = v.([]string)
+						}
+						if strb, err := bldr.Build(filepath.Join(path, node.Path), node, prev); err == nil {
+							model.Structures[smdl.Id] = strb
+						} else {
+							return errors.Wrap(err, "error running structure builder")
+						}
+					}
+				}
+			} else {
+				return errors.Errorf("invalid structure def")
+			}
+		}
+	}
+	for _, cld := range node.Children {
+		if err := loadStructureModelsVisit(filepath.Join(path, node.Path), cld, model); err != nil {
+			return errors.Wrap(err, "error visiting child")
+		}
+	}
+	return nil
 }
