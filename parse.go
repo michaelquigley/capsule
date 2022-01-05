@@ -76,6 +76,14 @@ func (pv *parseVisitor) visit(path string, de fs.DirEntry, err error) error {
 			Name:       filepath.Base(path),
 			Attributes: pv.cfg.GetAttributes(path, de),
 		}
+		if de.Name() == ".structure" {
+			if str, err := LoadStructureDef(path); err == nil {
+				ftr.Object = str
+				logrus.Debugf("structure loaded from '%v' with %d models", path, len(str.Models))
+			} else {
+				return errors.Wrapf(err, "error loading structure from '%v'", path)
+			}
+		}
 		node.Features = append(node.Features, ftr)
 		logrus.Debugf("'%v': %v", filepath.Base(path), ftr.Attributes.String())
 	}

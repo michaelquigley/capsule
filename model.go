@@ -20,6 +20,7 @@ type Capsule struct {
 type Feature struct {
 	Name       string
 	Attributes Attributes
+	Object     interface{}
 }
 
 type Attributes struct {
@@ -33,10 +34,6 @@ type Node struct {
 	Features []*Feature
 	Parent   *Node
 	Children []*Node
-}
-
-type StructuralDirective interface {
-	Build(rootPath string, node *Node, prev interface{}) (interface{}, error)
 }
 
 func (n *Node) FullPath() string {
