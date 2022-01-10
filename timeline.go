@@ -13,29 +13,33 @@ type TimelineStructure struct {
 
 type TimelineStructureBuilder struct{}
 
-func (self *TimelineStructureBuilder) Build(rootPath string, node *Node, prev interface{}) (interface{}, error) {
-	prevarr, ok := prev.([]string)
-	if !ok {
-		return nil, errors.Errorf("invalid previous state")
+func (self *TimelineStructureBuilder) Build(_ string, node *Node, prev interface{}) (interface{}, error) {
+	var prevarr []*Node
+	if prev != nil {
+		var ok bool
+		prevarr, ok = prev.([]*Node)
+		if !ok {
+			return nil, errors.Errorf("invalid previous state")
+		}
 	}
-	nextarr := make([]string, len(prevarr))
+	nextarr := make([]*Node, len(prevarr))
 	copy(nextarr, prevarr)
 
 	nodearr := self.inventory(node)
 	nextarr = append(nextarr, nodearr...)
 	sort.Slice(nextarr, func(i, j int) bool {
-		return nextarr[i] < nextarr[j]
+		return nextarr[i].Path < nextarr[j].Path
 	})
 	return nextarr, nil
 }
 
-func (self *TimelineStructureBuilder) inventory(node *Node) []string {
-	var paths []string
+func (self *TimelineStructureBuilder) inventory(node *Node) []*Node {
+	var nodes []*Node
 	for _, cld := range node.Children {
-		paths = append(paths, cld.Path)
+		nodes = append(nodes, cld)
 		logrus.Debugf("added node '%v' to timeline", cld.Path)
 	}
-	return paths
+	return nodes
 }
 
 func init() {

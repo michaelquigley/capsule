@@ -125,9 +125,9 @@ func loadStructureModelsVisit(path string, node *Node, model *Model) error {
 				logrus.Infof("running structure builders for '%v'", filepath.Join(path, node.Path))
 				for _, smdl := range def.Models {
 					if bldr, ok := smdl.Builder.(StructureBuilder); ok {
-						var prev []string
+						var prev interface{}
 						if v, found := model.Structures[smdl.Id]; found {
-							prev = v.([]string)
+							prev = v
 						}
 						if strb, err := bldr.Build(filepath.Join(path, node.Path), node, prev); err == nil {
 							model.Structures[smdl.Id] = strb

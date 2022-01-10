@@ -6,7 +6,9 @@ import (
 )
 
 func (self *Model) Dump() string {
-	return self.dumpNode("", self.Root)
+	out := self.dumpNode("", self.Root)
+	out += self.dumpStructures()
+	return out
 }
 
 func (self *Model) dumpNode(parentPath string, node *Node) string {
@@ -24,6 +26,14 @@ func (self *Model) dumpNode(parentPath string, node *Node) string {
 	out += "\n"
 	for _, child := range node.Children {
 		out += self.dumpNode(nodePath, child)
+	}
+	return out
+}
+
+func (self *Model) dumpStructures() string {
+	out := ""
+	for k, v := range self.Structures {
+		out += fmt.Sprintf("[%v] = %v\n", k, v)
 	}
 	return out
 }
