@@ -17,7 +17,7 @@ func Parse(srcPath string, cfg *Config) (model *Model, err error) {
 	srcPath = filepath.ToSlash(srcPath)
 
 	model = &Model{
-		SrcPath:    srcPath,
+		Path:       srcPath,
 		Structures: make(map[string]interface{}),
 	}
 

@@ -8,7 +8,7 @@ import (
 const capsuleVersion = "v0.1"
 
 type Model struct {
-	SrcPath    string
+	Path       string
 	Capsule    *Capsule
 	Root       *Node
 	Structures map[string]interface{}
