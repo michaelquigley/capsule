@@ -1,12 +1,5 @@
 package capsule
 
-import (
-	"fmt"
-	"path/filepath"
-)
-
-const capsuleVersion = "v0.1"
-
 type Model struct {
 	Path       string
 	Capsule    *Capsule
@@ -24,11 +17,7 @@ type Feature struct {
 	Object     interface{}
 }
 
-type Attributes struct {
-	Role  string
-	Class string
-	Type  string
-}
+type Attributes map[string]interface{}
 
 type Node struct {
 	Path     string
@@ -37,14 +26,4 @@ type Node struct {
 	Children []*Node
 }
 
-func (n *Node) FullPath() string {
-	if n.Parent != nil {
-		return filepath.Join(n.Parent.FullPath(), n.Path)
-	} else {
-		return n.Path
-	}
-}
-
-func (self *Attributes) String() string {
-	return fmt.Sprintf("{%v; %v; %v}", self.Role, self.Class, self.Type)
-}
+const capsuleVersion = "v0.1"

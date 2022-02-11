@@ -10,20 +10,13 @@ type Config struct {
 	AttributeHandlers []AttributeHandler
 }
 
-type AttributeHandler func(string, fs.DirEntry) Attributes
+type AttributeHandler func(string, fs.DirEntry) map[string]interface{}
 
-func (cfg *Config) GetAttributes(path string, de fs.DirEntry) Attributes {
-	merged := Attributes{}
+func (cfg *Config) GetAttributes(path string, de fs.DirEntry) map[string]interface{} {
+	merged := make(map[string]interface{})
 	for _, handler := range cfg.AttributeHandlers {
-		attrs := handler(path, de)
-		if attrs.Class != "" {
-			merged.Class = attrs.Class
-		}
-		if attrs.Role != "" {
-			merged.Role = attrs.Role
-		}
-		if attrs.Type != "" {
-			merged.Type = attrs.Type
+		for k, v := range handler(path, de) {
+			merged[k] = v
 		}
 	}
 	return merged
@@ -38,23 +31,23 @@ func DefaultConfig() *Config {
 	}
 }
 
-func filenameRole(path string, _ fs.DirEntry) Attributes {
+func filenameRole(path string, _ fs.DirEntry) map[string]interface{} {
 	base := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 	if base == "story" {
-		return Attributes{Role: "story"}
+		return map[string]interface{}{"role": "story"}
 	}
-	return Attributes{}
+	return nil
 }
 
-func filenameClassType(path string, _ fs.DirEntry) Attributes {
+func filenameClassType(path string, _ fs.DirEntry) map[string]interface{} {
 	switch strings.ToLower(filepath.Ext(path)) {
 	case ".md":
-		return Attributes{Class: "document", Type: "markdown"}
+		return map[string]interface{}{"class": "document", "type": "markdown"}
 	case ".png":
-		return Attributes{Class: "image", Type: "png"}
+		return map[string]interface{}{"class": "image", "type": "png"}
 	case ".jpg":
-		return Attributes{Class: "image", Type: "jpeg"}
+		return map[string]interface{}{"class": "image", "type": "jpeg"}
 	default:
-		return Attributes{}
+		return nil
 	}
 }

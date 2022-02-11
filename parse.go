@@ -91,7 +91,7 @@ func (pv *parseVisitor) visit(path string, de fs.DirEntry, err error) error {
 			}
 		}
 		node.Features = append(node.Features, ftr)
-		logrus.Debugf("'%v': %v", filepath.Base(path), ftr.Attributes.String())
+		logrus.Debugf("'%v': %v", filepath.Base(path), ftr.Attributes)
 	}
 
 	return nil
