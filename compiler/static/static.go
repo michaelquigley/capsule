@@ -4,13 +4,15 @@ import (
 	"github.com/michaelquigley/capsule"
 	"github.com/michaelquigley/capsule/compiler"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 type staticFactory struct{}
 
 func (f *staticFactory) New(cfg compiler.Config) (compiler.Compiler, error) {
 	sc := &staticCompiler{
-		build: "build/",
+		build:     "build/",
+		resources: "resources/",
 	}
 	if v, found := cfg["build"]; found {
 		if s, ok := v.(string); ok {
@@ -25,17 +27,8 @@ func (f *staticFactory) New(cfg compiler.Config) (compiler.Compiler, error) {
 		} else {
 			return nil, errors.Errorf("invalid 'resources' value")
 		}
-	} else {
-		return nil, errors.Errorf("missing 'resources' value")
 	}
 	return sc, nil
-}
-
-func (f *staticFactory) Doc() compiler.Def {
-	return compiler.Def{
-		"build":     compiler.Var{Desc: "build path", Default: "build/"},
-		"resources": compiler.Var{Desc: "resources path", Default: "resources/"},
-	}
 }
 
 type staticCompiler struct {
@@ -44,6 +37,8 @@ type staticCompiler struct {
 }
 
 func (sc *staticCompiler) Compile(m *capsule.Model) error {
+	logrus.Infof("build = '%v'", sc.build)
+	logrus.Infof("resources = '%v'", sc.resources)
 	return nil
 }
 
