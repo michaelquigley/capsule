@@ -13,7 +13,7 @@ func Get(id string) (Factory, error) {
 	if c, found := registry[id]; found {
 		return c, nil
 	}
-	return nil, errors.Errorf("no compiler '%v'", id)
+	return nil, errors.Errorf("no compiler with id '%v'", id)
 }
 
 var registry map[string]Factory

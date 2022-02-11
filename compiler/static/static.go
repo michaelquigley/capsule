@@ -7,6 +7,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type staticCompiler struct {
+	build     string
+	resources string
+}
+
+func (c *staticCompiler) Compile(m *capsule.Model) error {
+	logrus.Infof("build = '%v'", c.build)
+	logrus.Infof("resources = '%v'", c.resources)
+	return nil
+}
+
 type staticFactory struct{}
 
 func (f *staticFactory) New(cfg compiler.Config) (compiler.Compiler, error) {
@@ -29,17 +40,6 @@ func (f *staticFactory) New(cfg compiler.Config) (compiler.Compiler, error) {
 		}
 	}
 	return sc, nil
-}
-
-type staticCompiler struct {
-	build     string
-	resources string
-}
-
-func (sc *staticCompiler) Compile(m *capsule.Model) error {
-	logrus.Infof("build = '%v'", sc.build)
-	logrus.Infof("resources = '%v'", sc.resources)
-	return nil
 }
 
 func init() {
