@@ -41,7 +41,9 @@ func (cc *compileCommand) run(_ *cobra.Command, _ []string) {
 		panic(err)
 	}
 
-	fmt.Println(m.Dump())
+	if verbose {
+		fmt.Println(m.Dump())
+	}
 
 	st := static.New(&static.Config{BuildPath: cc.buildPath, ResourcePath: cc.resourcePath})
 	if err := st.Compile(m); err != nil {

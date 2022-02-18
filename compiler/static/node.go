@@ -2,7 +2,7 @@ package static
 
 import (
 	"github.com/michaelquigley/capsule"
-	"github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
 	"path/filepath"
 )
 
@@ -31,18 +31,15 @@ func (n *Node) ChildPaths() []string {
 	return childPaths
 }
 
-func (n *Node) Timeline() *capsule.TimelineStructure {
+func (n *Node) Timeline() (*capsule.TimelineStructure, error) {
 	if v, found := n.Model.Structures["timeline"]; found {
 		if ts, ok := v.(*capsule.TimelineStructure); ok {
-			logrus.Infof("returning timeline %p", ts)
-			return ts
+			return ts, nil
 		} else {
-			logrus.Info("invalid assert")
+			return nil, errors.Errorf("invalid assert in timeline")
 		}
-	} else {
-		logrus.Info("no timeline")
 	}
-	return nil
+	return nil, nil
 }
 
 func (n *Node) Rel(o *capsule.Node) (string, error) {

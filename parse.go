@@ -122,7 +122,7 @@ func loadStructureModelsVisit(path string, node *Node, model *Model) error {
 	for _, feat := range node.Features {
 		if feat.Name == ".structure" {
 			if def, ok := feat.Object.(*StructureDef); ok {
-				logrus.Infof("running structure builders for '%v'", filepath.Join(path, node.Path))
+				logrus.Debugf("running structure builders for '%v'", filepath.Join(path, node.Path))
 				for _, smdl := range def.Models {
 					if bldr, ok := smdl.Builder.(StructureBuilder); ok {
 						var prev interface{}
