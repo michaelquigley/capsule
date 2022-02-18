@@ -2,6 +2,7 @@ package static
 
 import (
 	"github.com/michaelquigley/capsule"
+	"github.com/sirupsen/logrus"
 	"path/filepath"
 )
 
@@ -9,10 +10,11 @@ import (
 //
 type Node struct {
 	*capsule.Node
+	Model *capsule.Model
 }
 
-func newNode(n *capsule.Node) *Node {
-	return &Node{n}
+func newNode(n *capsule.Node, m *capsule.Model) *Node {
+	return &Node{n, m}
 }
 
 func (n *Node) Title() string {
@@ -27,4 +29,26 @@ func (n *Node) ChildPaths() []string {
 		}
 	}
 	return childPaths
+}
+
+func (n *Node) Timeline() *capsule.TimelineStructure {
+	if v, found := n.Model.Structures["timeline"]; found {
+		if ts, ok := v.(*capsule.TimelineStructure); ok {
+			logrus.Infof("returning timeline %p", ts)
+			return ts
+		} else {
+			logrus.Info("invalid assert")
+		}
+	} else {
+		logrus.Info("no timeline")
+	}
+	return nil
+}
+
+func (n *Node) Rel(o *capsule.Node) (string, error) {
+	if rel, err := filepath.Rel(n.FullPath(), o.FullPath()); err == nil {
+		return filepath.ToSlash(rel), nil
+	} else {
+		return "", err
+	}
 }

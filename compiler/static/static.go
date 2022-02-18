@@ -25,23 +25,23 @@ func New(cfg *Config) *compiler {
 }
 
 func (cc *compiler) Compile(m *capsule.Model) error {
-	if err := cc.loadResources(); err != nil {
+	if err := cc.loadResources(m); err != nil {
 		return err
 	}
-	if err := cc.renderNode(m.Root); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (cc *compiler) loadResources() error {
-	if err := cc.loadTemplates(); err != nil {
+	if err := cc.renderNode(m.Root, m); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (cc *compiler) loadTemplates() error {
+func (cc *compiler) loadResources(m *capsule.Model) error {
+	if err := cc.loadTemplates(m); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (cc *compiler) loadTemplates(m *capsule.Model) error {
 	var tpls []string
 	err := fs.WalkDir(os.DirFS(cc.cfg.ResourcePath), ".", func(path string, de fs.DirEntry, err error) error {
 		if err != nil {
@@ -55,7 +55,7 @@ func (cc *compiler) loadTemplates() error {
 	if err != nil {
 		return errors.Wrap(err, "error loading resources")
 	}
-	if tmpl, err := template.ParseFiles(tpls...); err == nil {
+	if tmpl, err := template.New("").Funcs(cc.funcMap(m)).ParseFiles(tpls...); err == nil {
 		cc.tmpl = tmpl
 	} else {
 		return errors.Wrap(err, "error parsing templates")
@@ -63,7 +63,7 @@ func (cc *compiler) loadTemplates() error {
 	return nil
 }
 
-func (cc *compiler) renderNode(n *capsule.Node) error {
+func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 	nodePath := n.FullPath() + "/index.html"
 	renderPath := filepath.ToSlash(filepath.Join(cc.cfg.BuildPath, nodePath))
 	if err := os.MkdirAll(filepath.Dir(renderPath), os.ModePerm); err != nil {
@@ -73,14 +73,23 @@ func (cc *compiler) renderNode(n *capsule.Node) error {
 	if err != nil {
 		return err
 	}
-	if err := cc.tmpl.ExecuteTemplate(f, "node", newNode(n)); err != nil {
+	if err := cc.tmpl.ExecuteTemplate(f, "node", newNode(n, m)); err != nil {
 		return err
 	}
 	logrus.Infof("=> '%v'", renderPath)
 	for _, cn := range n.Children {
-		if err := cc.renderNode(cn); err != nil {
+		if err := cc.renderNode(cn, m); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (cc *compiler) funcMap(m *capsule.Model) template.FuncMap {
+	return template.FuncMap{
+		"wrap": func(n *capsule.Node) *Node {
+			logrus.Infof("wrap")
+			return newNode(n, m)
+		},
+	}
 }

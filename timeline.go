@@ -2,10 +2,15 @@ package capsule
 
 import (
 	"github.com/michaelquigley/cf"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"sort"
 )
+
+func init() {
+	CfOptions().AddFlexibleSetter("timeline", func(v interface{}, opt *cf.Options) (interface{}, error) {
+		return &TimelineStructureBuilder{}, nil
+	})
+}
 
 type TimelineStructure struct {
 	Nodes []*Node
@@ -14,23 +19,22 @@ type TimelineStructure struct {
 type TimelineStructureBuilder struct{}
 
 func (self *TimelineStructureBuilder) Build(_ string, node *Node, prev interface{}) (interface{}, error) {
-	var prevarr []*Node
+	var timeline *TimelineStructure
 	if prev != nil {
-		var ok bool
-		prevarr, ok = prev.([]*Node)
-		if !ok {
-			return nil, errors.Errorf("invalid previous state")
+		if v, ok := prev.(*TimelineStructure); ok {
+			timeline = v
 		}
 	}
-	nextarr := make([]*Node, len(prevarr))
-	copy(nextarr, prevarr)
+	if timeline == nil {
+		timeline = &TimelineStructure{}
+	}
 
-	nodearr := self.inventory(node)
-	nextarr = append(nextarr, nodearr...)
-	sort.Slice(nextarr, func(i, j int) bool {
-		return nextarr[i].Path < nextarr[j].Path
+	timeline.Nodes = append(timeline.Nodes, self.inventory(node)...)
+	sort.Slice(timeline.Nodes, func(i, j int) bool {
+		return timeline.Nodes[i].Path < timeline.Nodes[j].Path
 	})
-	return nextarr, nil
+
+	return timeline, nil
 }
 
 func (self *TimelineStructureBuilder) inventory(node *Node) []*Node {
@@ -40,10 +44,4 @@ func (self *TimelineStructureBuilder) inventory(node *Node) []*Node {
 		logrus.Debugf("added node '%v' to timeline", cld.Path)
 	}
 	return nodes
-}
-
-func init() {
-	CfOptions().AddFlexibleSetter("timeline", func(v interface{}, opt *cf.Options) (interface{}, error) {
-		return &TimelineStructureBuilder{}, nil
-	})
 }
