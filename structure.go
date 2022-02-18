@@ -22,6 +22,11 @@ func LoadStructureDef(path string) (*StructureDef, error) {
 	return def, nil
 }
 
+// StructureBuilder is used to create structures suited for capturing additional details about a capsule structure.
+// When a structure definition is encountered in the tree, the models are built using the Build method below. Build
+// takes a previous version of the identified model, allows additional transformation to be done to it, and emits an
+// altered version to insert back into the model.
+//
 type StructureBuilder interface {
 	Build(rootPath string, node *Node, prev interface{}) (interface{}, error)
 }
