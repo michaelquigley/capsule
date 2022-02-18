@@ -65,7 +65,7 @@ func (cc *compiler) loadTemplates() error {
 
 func (cc *compiler) renderNode(n *capsule.Node) error {
 	nodePath := n.FullPath() + "/index.html"
-	renderPath := filepath.Join(cc.cfg.BuildPath, nodePath)
+	renderPath := filepath.ToSlash(filepath.Join(cc.cfg.BuildPath, nodePath))
 	if err := os.MkdirAll(filepath.Dir(renderPath), os.ModePerm); err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func (cc *compiler) renderNode(n *capsule.Node) error {
 	if err != nil {
 		return err
 	}
-	if err := cc.tmpl.ExecuteTemplate(f, "node", n); err != nil {
+	if err := cc.tmpl.ExecuteTemplate(f, "node", newNode(n)); err != nil {
 		return err
 	}
 	logrus.Infof("=> '%v'", renderPath)
