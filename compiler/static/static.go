@@ -87,7 +87,7 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 
 func (cc *compiler) funcMap(m *capsule.Model) template.FuncMap {
 	return template.FuncMap{
-		"wrap": func(n *capsule.Node) *Node {
+		"node": func(n *capsule.Node) *Node {
 			logrus.Infof("wrap")
 			return newNode(n, m)
 		},
