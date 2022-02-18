@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/michaelquigley/capsule"
-	"github.com/michaelquigley/capsule/compiler/static"
-	_ "github.com/michaelquigley/capsule/compiler/static"
+	"github.com/michaelquigley/capsule/static"
+	_ "github.com/michaelquigley/capsule/static"
 	"github.com/spf13/cobra"
 )
 
