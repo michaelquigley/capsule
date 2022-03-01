@@ -11,10 +11,11 @@ import (
 type Node struct {
 	*capsule.Node
 	Model *capsule.Model
+	Story string
 }
 
 func newNode(n *capsule.Node, m *capsule.Model) *Node {
-	return &Node{n, m}
+	return &Node{Node: n, Model: m}
 }
 
 func (n *Node) Title() string {

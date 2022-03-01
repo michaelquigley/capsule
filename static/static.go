@@ -1,9 +1,12 @@
 package static
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/michaelquigley/capsule"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/yuin/goldmark"
 	"html/template"
 	"io/fs"
 	"os"
@@ -73,7 +76,15 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 	if err != nil {
 		return err
 	}
-	if err := cc.tmpl.ExecuteTemplate(f, "node", newNode(n, m)); err != nil {
+
+	staticNode := newNode(n, m)
+	story, err := cc.renderStory(staticNode, m)
+	if err != nil {
+		return err
+	}
+	staticNode.Story = story
+
+	if err := cc.tmpl.ExecuteTemplate(f, "node", staticNode); err != nil {
 		return err
 	}
 	logrus.Infof("=> '%v'", renderPath)
@@ -85,10 +96,34 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 	return nil
 }
 
+func (cc *compiler) renderStory(n *Node, m *capsule.Model) (string, error) {
+	stories := n.FeaturesWith(capsule.Attributes{"role": "story", "class": "document"})
+	if len(stories) == 1 {
+		storyPath := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), stories[0].Name))
+		logrus.Infof("story path = '%v'", storyPath)
+
+		storySrc, err := os.ReadFile(storyPath)
+		if err != nil {
+			return "", err
+		}
+
+		var buf bytes.Buffer
+		if err := goldmark.Convert(storySrc, &buf); err != nil {
+			return "", err
+		}
+
+		return buf.String(), nil
+	}
+	return "", nil
+}
+
 func (cc *compiler) funcMap(m *capsule.Model) template.FuncMap {
 	return template.FuncMap{
 		"node": func(n *capsule.Node) *Node {
 			return newNode(n, m)
+		},
+		"unescape": func(v interface{}) template.HTML {
+			return template.HTML(fmt.Sprintf("%v", v))
 		},
 	}
 }
