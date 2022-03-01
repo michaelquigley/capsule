@@ -2,7 +2,6 @@ package capsule
 
 import (
 	"fmt"
-	"path/filepath"
 	"sort"
 )
 
@@ -42,21 +41,6 @@ func (a Attributes) String() string {
 	}
 	out += "}"
 	return out
-}
-
-type Node struct {
-	Path     string
-	Features []*Feature
-	Parent   *Node
-	Children []*Node
-}
-
-func (n *Node) FullPath() string {
-	if n.Parent != nil {
-		return filepath.ToSlash(filepath.Join(n.Parent.FullPath(), n.Path))
-	} else {
-		return filepath.ToSlash(n.Path)
-	}
 }
 
 const capsuleVersion = "v0.1"
