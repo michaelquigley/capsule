@@ -100,7 +100,7 @@ func (cc *compiler) renderStory(n *Node, m *capsule.Model) (string, error) {
 	stories := n.FeaturesWith(capsule.Attributes{"role": "story", "class": "document"})
 	if len(stories) == 1 {
 		storyPath := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), stories[0].Name))
-		logrus.Infof("story path = '%v'", storyPath)
+		logrus.Debugf("story path = '%v'", storyPath)
 
 		storySrc, err := os.ReadFile(storyPath)
 		if err != nil {
