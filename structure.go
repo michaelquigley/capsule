@@ -30,3 +30,5 @@ func LoadStructureDef(path string) (*StructureDef, error) {
 type StructureBuilder interface {
 	Build(rootPath string, node *Node, prev interface{}) (interface{}, error)
 }
+
+const StructureFeature = "structure.yaml"

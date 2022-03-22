@@ -82,7 +82,7 @@ func (pv *parseVisitor) visit(path string, de fs.DirEntry, err error) error {
 			Name:       filepath.Base(path),
 			Attributes: pv.cfg.GetAttributes(path, de),
 		}
-		if de.Name() == ".structure" {
+		if de.Name() == StructureFeature {
 			if str, err := LoadStructureDef(path); err == nil {
 				ftr.Object = str
 				logrus.Debugf("structure loaded from '%v' with %d models", path, len(str.Models))
@@ -120,7 +120,7 @@ func loadStructureModels(model *Model) error {
 
 func loadStructureModelsVisit(path string, node *Node, model *Model) error {
 	for _, feat := range node.Features {
-		if feat.Name == ".structure" {
+		if feat.Name == StructureFeature {
 			if def, ok := feat.Object.(*StructureDef); ok {
 				logrus.Debugf("running structure builders for '%v'", filepath.Join(path, node.Path))
 				for _, smdl := range def.Models {
