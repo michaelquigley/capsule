@@ -82,7 +82,7 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 	if err != nil {
 		return err
 	}
-	staticNode.Story = story
+	staticNode.Body += story
 
 	if err := cc.tmpl.ExecuteTemplate(f, "node", staticNode); err != nil {
 		return err

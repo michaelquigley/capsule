@@ -11,7 +11,7 @@ import (
 type Node struct {
 	*capsule.Node
 	Model *capsule.Model
-	Story string
+	Body  string
 }
 
 func newNode(n *capsule.Node, m *capsule.Model) *Node {
