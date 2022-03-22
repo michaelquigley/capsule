@@ -43,4 +43,5 @@ func (a Attributes) String() string {
 	return out
 }
 
+const CapsuleFeature = "capsule.yaml"
 const capsuleVersion = "v0.1"

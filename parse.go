@@ -22,7 +22,7 @@ func Parse(srcPath string, cfg *Config) (model *Model, err error) {
 	}
 
 	// Load capsule metadata
-	model.Capsule, err = loadCapsule(filepath.Join(srcPath, ".capsule"))
+	model.Capsule, err = loadCapsule(filepath.Join(srcPath, CapsuleFeature))
 	if err != nil {
 		return nil, err
 	}
