@@ -17,6 +17,15 @@ func (n *Node) FullPath() string {
 	}
 }
 
+func (n *Node) FeatureNamed(name string) *Feature {
+	for _, ftr := range n.Features {
+		if ftr.Name == name {
+			return ftr
+		}
+	}
+	return nil
+}
+
 func (n *Node) FeaturesWith(attrs Attributes) []*Feature {
 	var matches []*Feature
 	for _, ftr := range n.Features {

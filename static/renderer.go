@@ -25,7 +25,7 @@ func LoadRendererDef(path string) (*RendererDef, error) {
 }
 
 type Renderer interface {
-	Render(m *capsule.Model, n *capsule.Node) (string, error)
+	Render(m *capsule.Model, n *Node) (string, error)
 }
 
 func RegisterRenderer(id string, fs cf.FlexibleSetter) {
@@ -34,5 +34,7 @@ func RegisterRenderer(id string, fs cf.FlexibleSetter) {
 	}
 	rendererRegistry[id] = fs
 }
+
+const RendererFeature = "renderer.yaml"
 
 var rendererRegistry map[string]cf.FlexibleSetter

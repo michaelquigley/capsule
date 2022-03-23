@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func Parse(srcPath string, cfg *Config) (model *Model, err error) {
+func Parse(srcPath string, opt *Options) (model *Model, err error) {
 	srcPath, err = filepath.Abs(srcPath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error making src path '%v' absolute", srcPath)
@@ -31,7 +31,7 @@ func Parse(srcPath string, cfg *Config) (model *Model, err error) {
 	}
 
 	// Inventory sources
-	pv := &parseVisitor{cfg, srcPath, make(map[string]*Node)}
+	pv := &parseVisitor{opt, srcPath, make(map[string]*Node)}
 	if err := fs.WalkDir(os.DirFS(srcPath), ".", pv.visit); err != nil {
 		return nil, errors.Wrap(err, "parse error")
 	}
@@ -56,7 +56,7 @@ func loadCapsule(capsulePath string) (*Capsule, error) {
 }
 
 type parseVisitor struct {
-	cfg     *Config
+	opt     *Options
 	srcPath string
 	index   map[string]*Node
 }
@@ -80,7 +80,7 @@ func (pv *parseVisitor) visit(path string, de fs.DirEntry, err error) error {
 	if !de.IsDir() {
 		ftr := &Feature{
 			Name:       filepath.Base(path),
-			Attributes: pv.cfg.GetAttributes(path, de),
+			Attributes: pv.opt.GetAttributes(path, de),
 		}
 		if de.Name() == StructureFeature {
 			if str, err := LoadStructureDef(path); err == nil {

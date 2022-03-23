@@ -36,7 +36,7 @@ func newCompileCommand() *compileCommand {
 }
 
 func (cc *compileCommand) run(_ *cobra.Command, _ []string) {
-	m, err := capsule.Parse(cc.capsulePath, capsule.DefaultConfig())
+	m, err := capsule.Parse(cc.capsulePath, capsule.DefaultOptions())
 	if err != nil {
 		panic(err)
 	}

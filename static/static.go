@@ -1,12 +1,10 @@
 package static
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/michaelquigley/capsule"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/yuin/goldmark"
 	"html/template"
 	"io/fs"
 	"os"
@@ -78,16 +76,21 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 	}
 
 	staticNode := newNode(n, m)
-	story, err := cc.renderStory(staticNode, m)
-	if err != nil {
-		return err
+	if renderers, err := cc.renderersForNode(staticNode); err == nil {
+		for _, renderer := range renderers {
+			if out, err := renderer.Render(m, staticNode); err == nil {
+				staticNode.Body += out
+			} else {
+				return err
+			}
+		}
 	}
-	staticNode.Body += story
 
 	if err := cc.tmpl.ExecuteTemplate(f, "node", staticNode); err != nil {
 		return err
 	}
 	logrus.Infof("=> '%v'", renderPath)
+
 	for _, cn := range n.Children {
 		if err := cc.renderNode(cn, m); err != nil {
 			return err
@@ -96,25 +99,21 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 	return nil
 }
 
-func (cc *compiler) renderStory(n *Node, m *capsule.Model) (string, error) {
-	stories := n.FeaturesWith(capsule.Attributes{"role": "story", "class": "document"})
-	if len(stories) == 1 {
-		storyPath := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), stories[0].Name))
-		logrus.Debugf("story path = '%v'", storyPath)
-
-		storySrc, err := os.ReadFile(storyPath)
-		if err != nil {
-			return "", err
+func (cc *compiler) renderersForNode(n *Node) ([]Renderer, error) {
+	if ftr := n.FeatureNamed(RendererFeature); ftr != nil {
+		path := filepath.ToSlash(filepath.Join(n.FullPath(), ftr.Name))
+		if def, err := LoadRendererDef(path); err == nil {
+			var renderers []Renderer
+			for _, rendererDef := range def.Renderers {
+				renderers = append(renderers, rendererDef.(Renderer))
+			}
+			return renderers, nil
+		} else {
+			return nil, err
 		}
-
-		var buf bytes.Buffer
-		if err := goldmark.Convert(storySrc, &buf); err != nil {
-			return "", err
-		}
-
-		return buf.String(), nil
+	} else {
+		return []Renderer{&StoryRenderer{}}, nil
 	}
-	return "", nil
 }
 
 func (cc *compiler) funcMap(m *capsule.Model) template.FuncMap {

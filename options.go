@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
-type Config struct {
+type Options struct {
 	AttributeHandlers []AttributeHandler
 }
 
 type AttributeHandler func(string, fs.DirEntry) Attributes
 
-func DefaultConfig() *Config {
-	return &Config{
+func DefaultOptions() *Options {
+	return &Options{
 		AttributeHandlers: []AttributeHandler{
 			filenameClassType,
 			filenameRole,
@@ -21,9 +21,9 @@ func DefaultConfig() *Config {
 	}
 }
 
-func (cfg *Config) GetAttributes(path string, de fs.DirEntry) Attributes {
+func (opt *Options) GetAttributes(path string, de fs.DirEntry) Attributes {
 	merged := make(Attributes)
-	for _, handler := range cfg.AttributeHandlers {
+	for _, handler := range opt.AttributeHandlers {
 		for k, v := range handler(path, de) {
 			merged[k] = v
 		}
