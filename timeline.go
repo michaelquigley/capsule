@@ -12,6 +12,8 @@ func init() {
 	})
 }
 
+const TimelineStructureName = "timeline"
+
 type TimelineStructure struct {
 	Nodes []*Node
 }

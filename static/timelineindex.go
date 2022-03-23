@@ -18,7 +18,7 @@ func init() {
 type TimelineIndex struct{}
 
 func (ti *TimelineIndex) Render(m *capsule.Model, n *Node, tmpl *template.Template) (string, error) {
-	if v, found := m.Structures["timeline"]; found {
+	if v, found := m.Structures[capsule.TimelineStructureName]; found {
 		if ts, ok := v.(*capsule.TimelineStructure); ok {
 			return ti.renderTimeline(ts, n, tmpl)
 		} else {
@@ -31,7 +31,7 @@ func (ti *TimelineIndex) Render(m *capsule.Model, n *Node, tmpl *template.Templa
 
 func (ti *TimelineIndex) renderTimeline(ts *capsule.TimelineStructure, n *Node, tmpl *template.Template) (string, error) {
 	buf := new(bytes.Buffer)
-	if err := tmpl.ExecuteTemplate(buf, "timeline_index", &timelineModel{n, ts}); err == nil {
+	if err := tmpl.ExecuteTemplate(buf, "timeline/index", &timelineModel{n, ts}); err == nil {
 		return buf.String(), nil
 	} else {
 		return "", err
