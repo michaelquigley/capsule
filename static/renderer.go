@@ -4,6 +4,7 @@ import (
 	"github.com/michaelquigley/capsule"
 	"github.com/michaelquigley/cf"
 	"github.com/pkg/errors"
+	"html/template"
 )
 
 type RendererDef struct {
@@ -25,7 +26,7 @@ func LoadRendererDef(path string) (*RendererDef, error) {
 }
 
 type Renderer interface {
-	Render(m *capsule.Model, n *Node) (string, error)
+	Render(m *capsule.Model, n *Node, tmpl *template.Template) (string, error)
 }
 
 func RegisterRenderer(id string, fs cf.FlexibleSetter) {

@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"reflect"
 )
 
 type Config struct {
@@ -76,14 +77,17 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 	}
 
 	staticNode := newNode(n, m)
-	if renderers, err := cc.renderersForNode(staticNode); err == nil {
+	if renderers, err := cc.renderersForNode(m, staticNode); err == nil {
 		for _, renderer := range renderers {
-			if out, err := renderer.Render(m, staticNode); err == nil {
+			logrus.Debugf("'%v' => %v", staticNode.FullPath(), reflect.TypeOf(renderer))
+			if out, err := renderer.Render(m, staticNode, cc.tmpl); err == nil {
 				staticNode.Body += out
 			} else {
 				return err
 			}
 		}
+	} else {
+		return err
 	}
 
 	if err := cc.tmpl.ExecuteTemplate(f, "node", staticNode); err != nil {
@@ -99,9 +103,9 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 	return nil
 }
 
-func (cc *compiler) renderersForNode(n *Node) ([]Renderer, error) {
+func (cc *compiler) renderersForNode(m *capsule.Model, n *Node) ([]Renderer, error) {
 	if ftr := n.FeatureNamed(RendererFeature); ftr != nil {
-		path := filepath.ToSlash(filepath.Join(n.FullPath(), ftr.Name))
+		path := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), ftr.Name))
 		if def, err := LoadRendererDef(path); err == nil {
 			var renderers []Renderer
 			for _, rendererDef := range def.Renderers {
