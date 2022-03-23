@@ -6,16 +6,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-type ProceduralDef struct {
-	Renderer *RendererDef
-}
-
 type RendererDef struct {
 	Renderers []interface{}
 }
 
-func LoadProceduralDef(path string) (*ProceduralDef, error) {
-	def := &ProceduralDef{}
+func LoadRendererDef(path string) (*RendererDef, error) {
+	def := &RendererDef{}
 
 	options := cf.DefaultOptions()
 	for k, v := range rendererRegistry {
