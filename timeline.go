@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	CfOptions().AddFlexibleSetter("timeline", func(v interface{}, opt *cf.Options) (interface{}, error) {
+	RegisterStructureBuilder("timeline", func(v interface{}, opt *cf.Options) (interface{}, error) {
 		return &TimelineStructureBuilder{}, nil
 	})
 }

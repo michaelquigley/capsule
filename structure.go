@@ -16,7 +16,13 @@ type StructureModel struct {
 
 func LoadStructureDef(path string) (*StructureDef, error) {
 	def := &StructureDef{}
-	if err := cf.BindYaml(def, path, CfOptions()); err != nil {
+
+	options := cf.DefaultOptions()
+	for k, v := range structureBuilderRegistry {
+		options.AddFlexibleSetter(k, v)
+	}
+
+	if err := cf.BindYaml(def, path, options); err != nil {
 		return nil, errors.Wrapf(err, "error loading structure def from '%v' (%v)", path, err)
 	}
 	return def, nil
@@ -30,5 +36,14 @@ func LoadStructureDef(path string) (*StructureDef, error) {
 type StructureBuilder interface {
 	Build(rootPath string, node *Node, prev interface{}) (interface{}, error)
 }
+
+func RegisterStructureBuilder(id string, fs cf.FlexibleSetter) {
+	if structureBuilderRegistry == nil {
+		structureBuilderRegistry = make(map[string]cf.FlexibleSetter)
+	}
+	structureBuilderRegistry[id] = fs
+}
+
+var structureBuilderRegistry map[string]cf.FlexibleSetter
 
 const StructureFeature = "structure.yaml"
