@@ -20,8 +20,9 @@ func LoadRendererDef(path string) (*RendererDef, error) {
 	}
 
 	if err := cf.BindYaml(def, path, options); err != nil {
-		return nil, errors.Wrapf(err, "error loading procedural def from '%v' (%v)", path, err)
+		return nil, errors.Wrapf(err, "error loading renderers from '%v' (%v)", path, err)
 	}
+
 	return def, nil
 }
 

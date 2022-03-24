@@ -108,8 +108,8 @@ func (cc *compiler) renderersForNode(m *capsule.Model, n *Node) ([]Renderer, err
 		path := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), ftr.Name))
 		if def, err := LoadRendererDef(path); err == nil {
 			var renderers []Renderer
-			for _, rendererDef := range def.Renderers {
-				renderers = append(renderers, rendererDef.(Renderer))
+			for _, renderer := range def.Renderers {
+				renderers = append(renderers, renderer.(Renderer))
 			}
 			return renderers, nil
 		} else {
