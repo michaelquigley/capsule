@@ -115,10 +115,10 @@ func linkNodes(index map[string]*Node) *Node {
 }
 
 func loadStructureModels(model *Model) error {
-	return loadStructureModelsVisit(".", model.Root, model)
+	return visitStructureModel(".", model.Root, model)
 }
 
-func loadStructureModelsVisit(path string, node *Node, model *Model) error {
+func visitStructureModel(path string, node *Node, model *Model) error {
 	for _, feat := range node.Features {
 		if feat.Name == StructureFeature {
 			if def, ok := feat.Object.(*StructureDef); ok {
@@ -142,7 +142,7 @@ func loadStructureModelsVisit(path string, node *Node, model *Model) error {
 		}
 	}
 	for _, cld := range node.Children {
-		if err := loadStructureModelsVisit(filepath.Join(path, node.Path), cld, model); err != nil {
+		if err := visitStructureModel(filepath.Join(path, node.Path), cld, model); err != nil {
 			return errors.Wrap(err, "error visiting child")
 		}
 	}
