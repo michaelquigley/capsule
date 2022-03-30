@@ -116,7 +116,7 @@ func (cc *compiler) renderersForNode(m *capsule.Model, n *Node) ([]Renderer, err
 			return nil, err
 		}
 	} else {
-		return []Renderer{&StoryRenderer{}}, nil
+		return []Renderer{&StoryRenderer{}, &FeaturesRenderer{}}, nil
 	}
 }
 

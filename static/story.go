@@ -19,7 +19,7 @@ func init() {
 
 type StoryRenderer struct{}
 
-func (sr *StoryRenderer) Render(m *capsule.Model, n *Node, _ *template.Template) (string, error) {
+func (sr *StoryRenderer) Render(m *capsule.Model, n *Node, tmpl *template.Template) (string, error) {
 	stories := n.FeaturesWith(capsule.Attributes{"role": "story", "class": "document"})
 	if len(stories) == 1 {
 		storyPath := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), stories[0].Name))
@@ -30,11 +30,17 @@ func (sr *StoryRenderer) Render(m *capsule.Model, n *Node, _ *template.Template)
 			return "", err
 		}
 
-		var buf bytes.Buffer
-		if err := goldmark.Convert(storySrc, &buf); err != nil {
+		var mdBuf bytes.Buffer
+		if err := goldmark.Convert(storySrc, &mdBuf); err != nil {
 			return "", err
 		}
-		return buf.String(), nil
+
+		var buf bytes.Buffer
+		if err := tmpl.ExecuteTemplate(&buf, "story", mdBuf.String()); err == nil {
+			return buf.String(), nil
+		}
+
+		return "", err
 	}
 
 	logrus.Debugf("no story to render on '%v'", n.FullPath())
