@@ -18,25 +18,43 @@ func init() {
 type FeaturesRenderer struct{}
 
 func (fr *FeaturesRenderer) Render(cfg *Config, m *capsule.Model, n *Node, tmpl *template.Template) (string, error) {
-	if err := fr.copyFeatures(cfg, m, n); err != nil {
+	ftrs, err := fr.copyFeatures(cfg, m, n)
+	if err != nil {
 		return "", err
 	}
+
 	buf := new(bytes.Buffer)
-	if err := tmpl.ExecuteTemplate(buf, "features/index", n); err == nil {
+	if err := tmpl.ExecuteTemplate(buf, "features/index", struct {
+		Node     *Node
+		Features []*capsule.Feature
+	}{n, ftrs}); err == nil {
 		return buf.String(), nil
 	} else {
 		return "", err
 	}
 }
 
-func (fr *FeaturesRenderer) copyFeatures(cfg *Config, m *capsule.Model, n *Node) error {
-	for _, ftr := range n.Features {
+func (fr *FeaturesRenderer) copyFeatures(cfg *Config, m *capsule.Model, n *Node) ([]*capsule.Feature, error) {
+	filtered := fr.filterFeatures(n)
+	logrus.Infof("filtered %d features", len(filtered))
+	for _, ftr := range filtered {
 		srcPath := filepath.Join(m.Path, n.FullPath(), ftr.Name)
 		dstPath := filepath.Join(cfg.BuildPath, n.FullPath(), ftr.Name)
 		if _, err := CopyFile(srcPath, dstPath); err != nil {
-			return err
+			return nil, err
 		}
 		logrus.Infof("=> '%v'", dstPath)
 	}
-	return nil
+	return filtered, nil
+}
+
+func (fr *FeaturesRenderer) filterFeatures(n *Node) []*capsule.Feature {
+	ftrs := n.FeaturesWithout(capsule.Attributes{"role": "story"})
+	var filtered []*capsule.Feature
+	for _, ftr := range ftrs {
+		if ftr.Name != capsule.StructureFeature && ftr.Name != capsule.CapsuleFeature {
+			filtered = append(filtered, ftr)
+		}
+	}
+	return filtered
 }
