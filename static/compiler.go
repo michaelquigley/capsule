@@ -103,7 +103,7 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 }
 
 func (cc *compiler) renderersForNode(m *capsule.Model, n *Node) ([]Renderer, error) {
-	if ftr := n.FeatureNamed(RendererFeature); ftr != nil {
+	if ftr := n.Features.Named(RendererFeature); ftr != nil {
 		path := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), ftr.Name))
 		if def, err := LoadRendererDef(path); err == nil {
 			var renderers []Renderer

@@ -34,7 +34,7 @@ func (fr *FeaturesRenderer) Render(cfg *Config, m *capsule.Model, n *Node, tmpl 
 	}
 }
 
-func (fr *FeaturesRenderer) copyFeatures(cfg *Config, m *capsule.Model, n *Node) ([]*capsule.Feature, error) {
+func (fr *FeaturesRenderer) copyFeatures(cfg *Config, m *capsule.Model, n *Node) (capsule.Features, error) {
 	filtered := fr.filterFeatures(n)
 	logrus.Infof("filtered %d features", len(filtered))
 	for _, ftr := range filtered {
@@ -48,13 +48,11 @@ func (fr *FeaturesRenderer) copyFeatures(cfg *Config, m *capsule.Model, n *Node)
 	return filtered, nil
 }
 
-func (fr *FeaturesRenderer) filterFeatures(n *Node) []*capsule.Feature {
-	ftrs := n.FeaturesWithout(capsule.Attributes{"role": "story"})
-	var filtered []*capsule.Feature
-	for _, ftr := range ftrs {
-		if ftr.Name != capsule.StructureFeature && ftr.Name != capsule.CapsuleFeature {
-			filtered = append(filtered, ftr)
-		}
-	}
-	return filtered
+func (fr *FeaturesRenderer) filterFeatures(n *Node) capsule.Features {
+	return n.Features.NameNotIn([]string{
+		capsule.CapsuleFeature,
+		capsule.StructureFeature,
+	}).Without(capsule.Attributes{
+		"role": "story",
+	})
 }
