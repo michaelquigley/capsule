@@ -36,7 +36,7 @@ func (fr *FeaturesRenderer) Render(cfg *Config, m *capsule.Model, n *Node, tmpl 
 
 func (fr *FeaturesRenderer) copyFeatures(cfg *Config, m *capsule.Model, n *Node) (capsule.Features, error) {
 	filtered := fr.filterFeatures(n)
-	logrus.Infof("filtered %d features", len(filtered))
+	logrus.Debugf("filtered %d features", len(filtered))
 	for _, ftr := range filtered {
 		srcPath := filepath.Join(m.Path, n.FullPath(), ftr.Name)
 		dstPath := filepath.Join(cfg.BuildPath, n.FullPath(), ftr.Name)
