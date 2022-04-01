@@ -42,7 +42,7 @@ type TimelineIndex struct {
 	cfg *TimelineIndexConfig
 }
 
-func (ti *TimelineIndex) Render(_ *Config, m *capsule.Model, n *Node, tmpl *template.Template) (string, error) {
+func (ti *TimelineIndex) Render(_ *Options, m *capsule.Model, n *Node, tmpl *template.Template) (string, error) {
 	if v, found := m.Structures[ti.cfg.Id]; found {
 		if ts, ok := v.(*capsule.TimelineStructure); ok {
 			return ti.renderTimeline(ts, n, tmpl)

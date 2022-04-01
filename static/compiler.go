@@ -1,28 +1,24 @@
 package static
 
 import (
-	"fmt"
 	"github.com/michaelquigley/capsule"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"html/template"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"reflect"
 )
 
-type Config struct {
+type Options struct {
 	BuildPath    string
 	ResourcePath string
 }
 
 type compiler struct {
-	cfg  *Config
-	tmpl *template.Template
+	cfg *Options
+	res *resources
 }
 
-func New(cfg *Config) *compiler {
+func New(cfg *Options) *compiler {
 	return &compiler{cfg: cfg}
 }
 
@@ -32,35 +28,6 @@ func (cc *compiler) Compile(m *capsule.Model) error {
 	}
 	if err := cc.renderNode(m.Root, m); err != nil {
 		return err
-	}
-	return nil
-}
-
-func (cc *compiler) loadResources(m *capsule.Model) error {
-	if err := cc.loadTemplates(m); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (cc *compiler) loadTemplates(m *capsule.Model) error {
-	var tpls []string
-	err := fs.WalkDir(os.DirFS(cc.cfg.ResourcePath), ".", func(path string, de fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if filepath.Ext(path) == ".gohtml" {
-			tpls = append(tpls, filepath.ToSlash(filepath.Join(cc.cfg.ResourcePath, path)))
-		}
-		return nil
-	})
-	if err != nil {
-		return errors.Wrap(err, "error loading resources")
-	}
-	if tmpl, err := template.New("").Funcs(cc.funcMap(m)).ParseFiles(tpls...); err == nil {
-		cc.tmpl = tmpl
-	} else {
-		return errors.Wrap(err, "error parsing templates")
 	}
 	return nil
 }
@@ -79,7 +46,7 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 	if renderers, err := cc.renderersForNode(m, staticNode); err == nil {
 		for _, renderer := range renderers {
 			logrus.Debugf("'%v' => %v", staticNode.FullPath(), reflect.TypeOf(renderer))
-			if out, err := renderer.Render(cc.cfg, m, staticNode, cc.tmpl); err == nil {
+			if out, err := renderer.Render(cc.cfg, m, staticNode, cc.res.tmpl); err == nil {
 				staticNode.Body += out
 			} else {
 				return err
@@ -89,7 +56,7 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 		return err
 	}
 
-	if err := cc.tmpl.ExecuteTemplate(f, "node", staticNode); err != nil {
+	if err := cc.res.tmpl.ExecuteTemplate(f, "node", staticNode); err != nil {
 		return err
 	}
 	logrus.Infof("=> '%v'", renderPath)
@@ -116,16 +83,5 @@ func (cc *compiler) renderersForNode(m *capsule.Model, n *Node) ([]Renderer, err
 		}
 	} else {
 		return []Renderer{&StoryRenderer{}, &FeaturesRenderer{}}, nil
-	}
-}
-
-func (cc *compiler) funcMap(m *capsule.Model) template.FuncMap {
-	return template.FuncMap{
-		"node": func(n *capsule.Node) *Node {
-			return newNode(n, m)
-		},
-		"unescape": func(v interface{}) template.HTML {
-			return template.HTML(fmt.Sprintf("%v", v))
-		},
 	}
 }

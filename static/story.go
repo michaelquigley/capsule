@@ -19,7 +19,7 @@ func init() {
 
 type StoryRenderer struct{}
 
-func (sr *StoryRenderer) Render(_ *Config, m *capsule.Model, n *Node, tmpl *template.Template) (string, error) {
+func (sr *StoryRenderer) Render(_ *Options, m *capsule.Model, n *Node, tmpl *template.Template) (string, error) {
 	stories := n.Features.With(capsule.Attributes{"role": "story", "class": "document"})
 	if len(stories) == 1 {
 		storyPath := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), stories[0].Name))

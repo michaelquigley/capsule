@@ -45,7 +45,7 @@ func (cc *compileCommand) run(_ *cobra.Command, _ []string) {
 		fmt.Println(m.Dump())
 	}
 
-	st := static.New(&static.Config{BuildPath: cc.buildPath, ResourcePath: cc.resourcePath})
+	st := static.New(&static.Options{BuildPath: cc.buildPath, ResourcePath: cc.resourcePath})
 	if err := st.Compile(m); err != nil {
 		panic(err)
 	}

@@ -17,8 +17,8 @@ func init() {
 
 type FeaturesRenderer struct{}
 
-func (fr *FeaturesRenderer) Render(cfg *Config, m *capsule.Model, n *Node, tmpl *template.Template) (string, error) {
-	ftrs, err := fr.copyFeatures(cfg, m, n)
+func (fr *FeaturesRenderer) Render(opt *Options, m *capsule.Model, n *Node, tmpl *template.Template) (string, error) {
+	ftrs, err := fr.copyFeatures(opt, m, n)
 	if err != nil {
 		return "", err
 	}
@@ -34,12 +34,12 @@ func (fr *FeaturesRenderer) Render(cfg *Config, m *capsule.Model, n *Node, tmpl 
 	}
 }
 
-func (fr *FeaturesRenderer) copyFeatures(cfg *Config, m *capsule.Model, n *Node) (capsule.Features, error) {
+func (fr *FeaturesRenderer) copyFeatures(opt *Options, m *capsule.Model, n *Node) (capsule.Features, error) {
 	filtered := fr.filterFeatures(n)
 	logrus.Debugf("filtered %d features", len(filtered))
 	for _, ftr := range filtered {
 		srcPath := filepath.Join(m.Path, n.FullPath(), ftr.Name)
-		dstPath := filepath.Join(cfg.BuildPath, n.FullPath(), ftr.Name)
+		dstPath := filepath.Join(opt.BuildPath, n.FullPath(), ftr.Name)
 		if _, err := CopyFile(srcPath, dstPath); err != nil {
 			return nil, err
 		}
