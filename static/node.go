@@ -58,3 +58,12 @@ func (n *Node) RelPath(path string) (string, error) {
 		return "", err
 	}
 }
+
+func (n *Node) ExportedFeatures() capsule.Features {
+	return n.Features.NameNotIn([]string{
+		capsule.CapsuleFeature,
+		capsule.StructureFeature,
+	}).Without(capsule.Attributes{
+		"role": "story",
+	})
+}

@@ -1,7 +1,6 @@
 package static
 
 import (
-	"bytes"
 	"github.com/michaelquigley/capsule"
 	"github.com/michaelquigley/cf"
 	"github.com/sirupsen/logrus"
@@ -10,49 +9,29 @@ import (
 )
 
 func init() {
-	RegisterRenderer("features/index", func(v interface{}, opt *cf.Options) (interface{}, error) {
+	RegisterRenderer("features", func(v interface{}, opt *cf.Options) (interface{}, error) {
 		return &FeaturesRenderer{}, nil
 	})
 }
 
 type FeaturesRenderer struct{}
 
-func (fr *FeaturesRenderer) Render(opt *Options, m *capsule.Model, n *Node, tmpl *template.Template) (string, error) {
-	ftrs, err := fr.copyFeatures(opt, m, n)
-	if err != nil {
+func (fr *FeaturesRenderer) Render(opt *Options, m *capsule.Model, n *Node, _ *template.Template) (string, error) {
+	if err := fr.copyFeatures(opt, m, n); err != nil {
 		return "", err
 	}
-
-	buf := new(bytes.Buffer)
-	if err := tmpl.ExecuteTemplate(buf, "features/index", struct {
-		Node     *Node
-		Features []*capsule.Feature
-	}{n, ftrs}); err == nil {
-		return buf.String(), nil
-	} else {
-		return "", err
-	}
+	return "", nil
 }
 
-func (fr *FeaturesRenderer) copyFeatures(opt *Options, m *capsule.Model, n *Node) (capsule.Features, error) {
-	filtered := fr.filterFeatures(n)
-	logrus.Debugf("filtered %d features", len(filtered))
-	for _, ftr := range filtered {
-		srcPath := filepath.Join(m.Path, n.FullPath(), ftr.Name)
-		dstPath := filepath.Join(opt.BuildPath, n.FullPath(), ftr.Name)
+func (fr *FeaturesRenderer) copyFeatures(opt *Options, m *capsule.Model, n *Node) error {
+	exported := n.ExportedFeatures()
+	for _, ftr := range exported {
+		srcPath := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), ftr.Name))
+		dstPath := filepath.ToSlash(filepath.Join(opt.BuildPath, n.FullPath(), ftr.Name))
 		if _, err := CopyFile(srcPath, dstPath); err != nil {
-			return nil, err
+			return err
 		}
 		logrus.Infof("=> '%v'", dstPath)
 	}
-	return filtered, nil
-}
-
-func (fr *FeaturesRenderer) filterFeatures(n *Node) capsule.Features {
-	return n.Features.NameNotIn([]string{
-		capsule.CapsuleFeature,
-		capsule.StructureFeature,
-	}).Without(capsule.Attributes{
-		"role": "story",
-	})
+	return nil
 }
