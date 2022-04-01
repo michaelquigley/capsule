@@ -66,7 +66,7 @@ func (cc *compiler) loadStatic() error {
 	err := fs.WalkDir(os.DirFS(filepath.Join(cc.opt.ResourcePath, StaticRoot)), ".", func(path string, de fs.DirEntry, err error) error {
 		if !de.IsDir() {
 			cc.res.statics = append(cc.res.statics, filepath.ToSlash(path))
-			logrus.Infof("static => '%v'", path)
+			logrus.Debugf("loaded => '%v'", path)
 		}
 		return nil
 	})
