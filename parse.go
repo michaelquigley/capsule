@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"reflect"
 )
 
 func Parse(srcPath string, opt *Options) (model *Model, err error) {
@@ -18,7 +19,7 @@ func Parse(srcPath string, opt *Options) (model *Model, err error) {
 
 	model = &Model{
 		Path:       srcPath,
-		Structures: make(map[string]interface{}),
+		Structures: make(map[string]Structure),
 	}
 
 	// Load capsule metadata
@@ -125,7 +126,7 @@ func visitStructureModel(path string, node *Node, model *Model) error {
 				logrus.Debugf("running structure builders for '%v'", filepath.Join(path, node.Path))
 				for _, smdl := range def.Models {
 					if bldr, ok := smdl.Builder.(StructureBuilder); ok {
-						var prev interface{}
+						var prev Structure
 						if v, found := model.Structures[smdl.Id]; found {
 							prev = v
 						}
@@ -134,6 +135,8 @@ func visitStructureModel(path string, node *Node, model *Model) error {
 						} else {
 							return errors.Wrap(err, "error running structure builder")
 						}
+					} else {
+						return errors.Errorf("invalid structure builder '%v'", reflect.TypeOf(smdl.Builder))
 					}
 				}
 			} else {

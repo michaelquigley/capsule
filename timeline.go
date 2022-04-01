@@ -1,6 +1,7 @@
 package capsule
 
 import (
+	"fmt"
 	"github.com/michaelquigley/cf"
 	"github.com/sirupsen/logrus"
 	"sort"
@@ -16,9 +17,18 @@ type TimelineStructure struct {
 	Nodes []*Node
 }
 
+func (tl *TimelineStructure) Dump() string {
+	out := "{\n"
+	for _, node := range tl.Nodes {
+		out += fmt.Sprintf("\t%v\n", node.FullPath())
+	}
+	out += "}\n"
+	return out
+}
+
 type TimelineStructureBuilder struct{}
 
-func (self *TimelineStructureBuilder) Build(_ string, node *Node, prev interface{}) (interface{}, error) {
+func (self *TimelineStructureBuilder) Build(_ string, node *Node, prev Structure) (Structure, error) {
 	var timeline *TimelineStructure
 	if prev != nil {
 		if v, ok := prev.(*TimelineStructure); ok {

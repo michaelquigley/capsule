@@ -23,6 +23,7 @@ func (self *Model) dumpNode(parentPath string, node *Node) string {
 	for _, feature := range node.Features {
 		out += fmt.Sprintf("+-- %v %v\n", feature.Name, feature.Attributes)
 	}
+
 	out += "\n"
 	for _, child := range node.Children {
 		out += self.dumpNode(nodePath, child)
@@ -33,7 +34,7 @@ func (self *Model) dumpNode(parentPath string, node *Node) string {
 func (self *Model) dumpStructures() string {
 	out := ""
 	for k, v := range self.Structures {
-		out += fmt.Sprintf("[%v] = %v\n", k, v)
+		out += fmt.Sprintf("[%v]: %v\n", k, v.Dump())
 	}
 	return out
 }

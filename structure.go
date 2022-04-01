@@ -6,10 +6,10 @@ import (
 )
 
 type StructureDef struct {
-	Models []*StructureModel
+	Models []*ModelDef
 }
 
-type StructureModel struct {
+type ModelDef struct {
 	Id      string
 	Builder interface{}
 }
@@ -25,7 +25,16 @@ func LoadStructureDef(path string) (*StructureDef, error) {
 	if err := cf.BindYaml(def, path, options); err != nil {
 		return nil, errors.Wrapf(err, "error loading structure def from '%v' (%v)", path, err)
 	}
+
 	return def, nil
+}
+
+// Structure defines the interface that must be implemented by all structure models.
+//
+type Structure interface {
+	// Dump emits a string representation of the structure model for use in dump debugging output.
+	//
+	Dump() string
 }
 
 // StructureBuilder is used to create structures suited for capturing additional details about a capsule structure.
@@ -34,7 +43,7 @@ func LoadStructureDef(path string) (*StructureDef, error) {
 // altered version to insert back into the model.
 //
 type StructureBuilder interface {
-	Build(rootPath string, node *Node, prev interface{}) (interface{}, error)
+	Build(rootPath string, node *Node, prev Structure) (Structure, error)
 }
 
 func RegisterStructureBuilder(id string, fs cf.FlexibleSetter) {

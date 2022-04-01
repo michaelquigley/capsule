@@ -4,7 +4,7 @@ type Model struct {
 	Path       string
 	Capsule    *Capsule
 	Root       *Node
-	Structures map[string]interface{}
+	Structures map[string]Structure
 }
 
 type Capsule struct {
