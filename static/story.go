@@ -36,7 +36,7 @@ func (sr *StoryRenderer) Render(_ *Options, m *capsule.Model, n *Node, tmpl *tem
 		}
 
 		var buf bytes.Buffer
-		if err := tmpl.ExecuteTemplate(&buf, "story", mdBuf.String()); err == nil {
+		if err := tmpl.ExecuteTemplate(&buf, "renderers/story", mdBuf.String()); err == nil {
 			return buf.String(), nil
 		}
 

@@ -34,7 +34,7 @@ type TimelineIndexConfig struct {
 func DefaultTimelineIndexConfig() *TimelineIndexConfig {
 	return &TimelineIndexConfig{
 		Id:       "timeline",
-		Template: "timeline/index",
+		Template: "renderers/timelineindex",
 	}
 }
 
