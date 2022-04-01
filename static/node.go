@@ -63,6 +63,7 @@ func (n *Node) ExportedFeatures() capsule.Features {
 	return n.Features.NameNotIn([]string{
 		capsule.CapsuleFeature,
 		capsule.StructureFeature,
+		RendererFeature,
 	}).Without(capsule.Attributes{
 		"role": "story",
 	})
