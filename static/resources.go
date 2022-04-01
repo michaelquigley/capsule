@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/michaelquigley/capsule"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"html/template"
 	"io/fs"
 	"os"
@@ -11,7 +12,8 @@ import (
 )
 
 type resources struct {
-	tmpl *template.Template
+	tmpl    *template.Template
+	statics []string
 }
 
 func (cc *compiler) loadResources(m *capsule.Model) error {
@@ -19,22 +21,25 @@ func (cc *compiler) loadResources(m *capsule.Model) error {
 	if err := cc.loadTemplates(m); err != nil {
 		return err
 	}
+	if err := cc.loadStatic(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (cc *compiler) loadTemplates(m *capsule.Model) error {
 	var tpls []string
-	err := fs.WalkDir(os.DirFS(filepath.Join(cc.cfg.ResourcePath, TemplatesRoot)), ".", func(path string, de fs.DirEntry, err error) error {
+	err := fs.WalkDir(os.DirFS(filepath.Join(cc.opt.ResourcePath, TemplatesRoot)), ".", func(path string, de fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if filepath.Ext(path) == ".gohtml" {
-			tpls = append(tpls, filepath.ToSlash(filepath.Join(cc.cfg.ResourcePath, TemplatesRoot, path)))
+			tpls = append(tpls, filepath.ToSlash(filepath.Join(cc.opt.ResourcePath, TemplatesRoot, path)))
 		}
 		return nil
 	})
 	if err != nil {
-		return errors.Wrap(err, "error loading resources")
+		return errors.Wrap(err, "error loading templates")
 	}
 	if tmpl, err := template.New("").Funcs(cc.funcMap(m)).ParseFiles(tpls...); err == nil {
 		cc.res.tmpl = tmpl
@@ -56,3 +61,34 @@ func (cc *compiler) funcMap(m *capsule.Model) template.FuncMap {
 }
 
 const TemplatesRoot = "templates"
+
+func (cc *compiler) loadStatic() error {
+	err := fs.WalkDir(os.DirFS(filepath.Join(cc.opt.ResourcePath, StaticRoot)), ".", func(path string, de fs.DirEntry, err error) error {
+		if !de.IsDir() {
+			cc.res.statics = append(cc.res.statics, filepath.ToSlash(path))
+			logrus.Infof("static => '%v'", path)
+		}
+		return nil
+	})
+	if err != nil {
+		return errors.Wrap(err, "error loading statics")
+	}
+	return nil
+}
+
+func (cc *compiler) copyStatic() error {
+	for _, static := range cc.res.statics {
+		srcPath := filepath.ToSlash(filepath.Join(cc.opt.ResourcePath, StaticRoot, static))
+		dstPath := filepath.ToSlash(filepath.Join(cc.opt.BuildPath, static))
+		if err := os.MkdirAll(filepath.Dir(dstPath), os.ModePerm); err != nil {
+			return err
+		}
+		if _, err := CopyFile(srcPath, dstPath); err != nil {
+			return err
+		}
+		logrus.Infof("=> '%v'", dstPath)
+	}
+	return nil
+}
+
+const StaticRoot = "static"

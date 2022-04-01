@@ -50,3 +50,11 @@ func (n *Node) Rel(o *capsule.Node) (string, error) {
 		return "", err
 	}
 }
+
+func (n *Node) RelPath(path string) (string, error) {
+	if rel, err := filepath.Rel(n.FullPath(), path); err == nil {
+		return filepath.ToSlash(rel), nil
+	} else {
+		return "", err
+	}
+}
