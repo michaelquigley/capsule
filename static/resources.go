@@ -118,17 +118,19 @@ func (cc *compiler) loadStatic() error {
 	return nil
 }
 
-func (cc *compiler) copyStatic() error {
+func (cc *compiler) copyStatic() ([]string, error) {
+	var dstPaths []string
 	for _, static := range cc.res.statics {
 		srcPath := filepath.ToSlash(filepath.Join(cc.opt.ResourcePath, staticRoot, static))
 		dstPath := filepath.ToSlash(filepath.Join(cc.opt.BuildPath, static))
 		if err := os.MkdirAll(filepath.Dir(dstPath), os.ModePerm); err != nil {
-			return err
+			return nil, err
 		}
 		if _, err := CopyFile(srcPath, dstPath); err != nil {
-			return err
+			return nil, err
 		}
+		dstPaths = append(dstPaths, static)
 		logrus.Infof("=> '%v'", dstPath)
 	}
-	return nil
+	return dstPaths, nil
 }

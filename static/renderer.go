@@ -8,7 +8,7 @@ import (
 )
 
 type Renderer interface {
-	Render(cfg *Options, m *capsule.Model, n *Node, tmpl *template.Template) (string, error)
+	Render(cfg *Options, m *capsule.Model, n *Node, tmpl *template.Template) (string, []string, error)
 }
 
 func RegisterRenderer(id string, fs cf.FlexibleSetter) {
