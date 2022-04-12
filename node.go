@@ -7,6 +7,7 @@ type Node struct {
 	Features Features
 	Parent   *Node
 	Children []*Node
+	V        map[string]interface{}
 }
 
 func (n *Node) FullPath() string {
