@@ -1,7 +1,6 @@
 package static
 
 import (
-	"fmt"
 	"github.com/michaelquigley/capsule"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -56,17 +55,6 @@ func (cc *compiler) loadTemplates(m *capsule.Model) error {
 		return errors.Wrap(err, "error parsing templates")
 	}
 	return nil
-}
-
-func (cc *compiler) funcMap(m *capsule.Model) template.FuncMap {
-	return template.FuncMap{
-		"node": func(n *capsule.Node) *Node {
-			return newNode(n, m)
-		},
-		"unescape": func(v interface{}) template.HTML {
-			return template.HTML(fmt.Sprintf("%v", v))
-		},
-	}
 }
 
 func (cc *compiler) loadRenderYaml() error {
