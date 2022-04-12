@@ -12,13 +12,22 @@ import (
 )
 
 type resources struct {
-	tmpl    *template.Template
-	statics []string
+	tmpl     *template.Template
+	template map[string]string
+	body     map[string][]Renderer
+	statics  []string
 }
+
+const RenderYaml = "render.yaml"
+const StaticRoot = "static"
+const TemplatesRoot = "templates"
 
 func (cc *compiler) loadResources(m *capsule.Model) error {
 	cc.res = &resources{}
 	if err := cc.loadTemplates(m); err != nil {
+		return err
+	}
+	if err := cc.loadRenderYaml(); err != nil {
 		return err
 	}
 	if err := cc.loadStatic(); err != nil {
@@ -60,7 +69,40 @@ func (cc *compiler) funcMap(m *capsule.Model) template.FuncMap {
 	}
 }
 
-const TemplatesRoot = "templates"
+func (cc *compiler) loadRenderYaml() error {
+	renderYamlPath := filepath.Join(cc.opt.ResourcePath, RenderYaml)
+	_, err := os.Stat(renderYamlPath)
+	if os.IsNotExist(err) {
+		logrus.Warnf("no %v loaded", renderYamlPath)
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if def, err := LoadRenderDef(renderYamlPath); err == nil {
+		for _, entry := range def.Render {
+			if entry.Template != "" {
+				if cc.res.template == nil {
+					cc.res.template = make(map[string]string)
+				}
+				cc.res.template[entry.Path] = entry.Template
+			}
+			if len(entry.Body) > 0 {
+				if cc.res.body == nil {
+					cc.res.body = make(map[string][]Renderer)
+				}
+				var renderers []Renderer
+				for _, v := range entry.Body {
+					renderers = append(renderers, v.(Renderer))
+				}
+				cc.res.body[entry.Path] = renderers
+			}
+		}
+	} else {
+		return err
+	}
+	return nil
+}
 
 func (cc *compiler) loadStatic() error {
 	err := fs.WalkDir(os.DirFS(filepath.Join(cc.opt.ResourcePath, StaticRoot)), ".", func(path string, de fs.DirEntry, err error) error {
@@ -90,5 +132,3 @@ func (cc *compiler) copyStatic() error {
 	}
 	return nil
 }
-
-const StaticRoot = "static"

@@ -46,7 +46,7 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 	}
 
 	staticNode := newNode(n, m)
-	if renderers, err := cc.renderersForNode(m, staticNode); err == nil {
+	if renderers, err := cc.renderersForNode(staticNode); err == nil {
 		for _, renderer := range renderers {
 			logrus.Debugf("'%v' => %v", staticNode.FullPath(), reflect.TypeOf(renderer))
 			if out, err := renderer.Render(cc.opt, m, staticNode, cc.res.tmpl); err == nil {
@@ -72,19 +72,11 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) error {
 	return nil
 }
 
-func (cc *compiler) renderersForNode(m *capsule.Model, n *Node) ([]Renderer, error) {
-	if ftr := n.Features.Named(RendererFeature); ftr != nil {
-		path := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), ftr.Name))
-		if def, err := LoadRendererDef(path); err == nil {
-			var renderers []Renderer
-			for _, renderer := range def.Renderers {
-				renderers = append(renderers, renderer.(Renderer))
-			}
+func (cc *compiler) renderersForNode(n *Node) ([]Renderer, error) {
+	if cc.res.body != nil {
+		if renderers, found := cc.res.body[n.FullPath()]; found {
 			return renderers, nil
-		} else {
-			return nil, err
 		}
-	} else {
-		return []Renderer{&StoryRenderer{}, &FeaturesRenderer{}}, nil
 	}
+	return []Renderer{&StoryRenderer{}, &FeaturesRenderer{}}, nil
 }
