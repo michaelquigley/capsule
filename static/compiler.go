@@ -16,7 +16,7 @@ type Options struct {
 
 type compiler struct {
 	opt *Options
-	res *resources
+	r   *resources
 }
 
 func New(cfg *Options) *compiler {
@@ -24,10 +24,12 @@ func New(cfg *Options) *compiler {
 }
 
 func (cc *compiler) Compile(m *capsule.Model) error {
-	if err := cc.loadResources(m); err != nil {
+	r, err := loadResources(cc.opt, m)
+	if err != nil {
 		return err
 	}
-	staticPaths, err := cc.copyStatic()
+	cc.r = r
+	staticPaths, err := cc.r.build(cc.opt)
 	if err != nil {
 		return err
 	}
@@ -57,7 +59,7 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, err
 	if renderers, err := cc.renderersForNode(staticNode); err == nil {
 		for _, renderer := range renderers {
 			logrus.Debugf("'%v' => %v", staticNode.FullPath(), reflect.TypeOf(renderer))
-			out, rendererPaths, err := renderer.Render(cc.opt, m, staticNode, cc.res.tmpl)
+			out, rendererPaths, err := renderer.Render(cc.opt, m, staticNode, cc.r.tmpl)
 			if err == nil {
 				staticNode.Body += out
 				dstPaths = append(dstPaths, rendererPaths...)
@@ -69,7 +71,7 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, err
 		return nil, err
 	}
 
-	if err := cc.res.tmpl.ExecuteTemplate(f, "node", staticNode); err != nil {
+	if err := cc.r.tmpl.ExecuteTemplate(f, "node", staticNode); err != nil {
 		return nil, err
 	}
 	logrus.Infof("=> '%v'", renderPath)
@@ -87,8 +89,8 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, err
 }
 
 func (cc *compiler) renderersForNode(n *Node) ([]Renderer, error) {
-	if cc.res.body != nil {
-		if renderers, found := cc.res.body[n.FullPath()]; found {
+	if cc.r.body != nil {
+		if renderers, found := cc.r.body[n.FullPath()]; found {
 			return renderers, nil
 		}
 	}

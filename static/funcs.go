@@ -6,7 +6,7 @@ import (
 	"html/template"
 )
 
-func (cc *compiler) funcMap(m *capsule.Model) template.FuncMap {
+func funcMap(m *capsule.Model) template.FuncMap {
 	return template.FuncMap{
 		"node": func(n *capsule.Node) *Node {
 			return newNode(n, m)
