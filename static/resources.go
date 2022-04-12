@@ -18,9 +18,9 @@ type resources struct {
 	statics  []string
 }
 
-const RenderYaml = "render.yaml"
-const StaticRoot = "static"
-const TemplatesRoot = "templates"
+const renderYaml = "render.yaml"
+const staticRoot = "static"
+const templatesRoot = "templates"
 
 func (cc *compiler) loadResources(m *capsule.Model) error {
 	cc.res = &resources{}
@@ -38,12 +38,12 @@ func (cc *compiler) loadResources(m *capsule.Model) error {
 
 func (cc *compiler) loadTemplates(m *capsule.Model) error {
 	var tpls []string
-	err := fs.WalkDir(os.DirFS(filepath.Join(cc.opt.ResourcePath, TemplatesRoot)), ".", func(path string, de fs.DirEntry, err error) error {
+	err := fs.WalkDir(os.DirFS(filepath.Join(cc.opt.ResourcePath, templatesRoot)), ".", func(path string, de fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if filepath.Ext(path) == ".gohtml" {
-			tpls = append(tpls, filepath.ToSlash(filepath.Join(cc.opt.ResourcePath, TemplatesRoot, path)))
+			tpls = append(tpls, filepath.ToSlash(filepath.Join(cc.opt.ResourcePath, templatesRoot, path)))
 		}
 		return nil
 	})
@@ -70,7 +70,7 @@ func (cc *compiler) funcMap(m *capsule.Model) template.FuncMap {
 }
 
 func (cc *compiler) loadRenderYaml() error {
-	renderYamlPath := filepath.Join(cc.opt.ResourcePath, RenderYaml)
+	renderYamlPath := filepath.Join(cc.opt.ResourcePath, renderYaml)
 	_, err := os.Stat(renderYamlPath)
 	if os.IsNotExist(err) {
 		logrus.Warnf("no %v loaded", renderYamlPath)
@@ -105,7 +105,7 @@ func (cc *compiler) loadRenderYaml() error {
 }
 
 func (cc *compiler) loadStatic() error {
-	err := fs.WalkDir(os.DirFS(filepath.Join(cc.opt.ResourcePath, StaticRoot)), ".", func(path string, de fs.DirEntry, err error) error {
+	err := fs.WalkDir(os.DirFS(filepath.Join(cc.opt.ResourcePath, staticRoot)), ".", func(path string, de fs.DirEntry, err error) error {
 		if !de.IsDir() {
 			cc.res.statics = append(cc.res.statics, filepath.ToSlash(path))
 			logrus.Debugf("loaded => '%v'", path)
@@ -120,7 +120,7 @@ func (cc *compiler) loadStatic() error {
 
 func (cc *compiler) copyStatic() error {
 	for _, static := range cc.res.statics {
-		srcPath := filepath.ToSlash(filepath.Join(cc.opt.ResourcePath, StaticRoot, static))
+		srcPath := filepath.ToSlash(filepath.Join(cc.opt.ResourcePath, staticRoot, static))
 		dstPath := filepath.ToSlash(filepath.Join(cc.opt.BuildPath, static))
 		if err := os.MkdirAll(filepath.Dir(dstPath), os.ModePerm); err != nil {
 			return err
