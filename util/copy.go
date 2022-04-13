@@ -1,4 +1,4 @@
-package static
+package util
 
 import (
 	"io"

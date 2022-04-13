@@ -2,6 +2,7 @@ package static
 
 import (
 	"github.com/michaelquigley/capsule"
+	"github.com/michaelquigley/capsule/util"
 	"github.com/michaelquigley/cf"
 	"github.com/sirupsen/logrus"
 	"html/template"
@@ -30,7 +31,7 @@ func (fr *FeaturesRenderer) copyFeatures(opt *Options, m *capsule.Model, n *caps
 	for _, ftr := range exported {
 		srcPath := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), ftr.Name))
 		dstPath := filepath.ToSlash(filepath.Join(opt.BuildPath, n.FullPath(), ftr.Name))
-		if _, err := CopyFile(srcPath, dstPath); err != nil {
+		if _, err := util.CopyFile(srcPath, dstPath); err != nil {
 			return nil, err
 		}
 		logrus.Infof("=> '%v'", dstPath)

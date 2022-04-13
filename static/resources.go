@@ -2,6 +2,7 @@ package static
 
 import (
 	"github.com/michaelquigley/capsule"
+	"github.com/michaelquigley/capsule/util"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"html/template"
@@ -118,7 +119,7 @@ func (r *resources) copyStatic(opt *Options) ([]string, error) {
 		if err := os.MkdirAll(filepath.Dir(dstPath), os.ModePerm); err != nil {
 			return nil, err
 		}
-		if _, err := CopyFile(srcPath, dstPath); err != nil {
+		if _, err := util.CopyFile(srcPath, dstPath); err != nil {
 			return nil, err
 		}
 		dstPaths = append(dstPaths, static)
