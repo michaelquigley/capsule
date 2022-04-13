@@ -17,3 +17,21 @@ func (n *Node) FullPath() string {
 		return filepath.ToSlash(n.Path)
 	}
 }
+
+func (n *Node) SetV(key string, v interface{}) {
+	if n.V == nil {
+		n.V = make(map[string]interface{})
+	}
+	n.V[key] = v
+}
+
+func (n *Node) VString(key string) string {
+	if n.V != nil {
+		if v, found := n.V[key]; found {
+			if s, ok := v.(string); ok {
+				return s
+			}
+		}
+	}
+	return ""
+}

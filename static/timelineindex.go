@@ -42,7 +42,7 @@ type TimelineIndex struct {
 	cfg *TimelineIndexConfig
 }
 
-func (ti *TimelineIndex) Render(_ *Options, m *capsule.Model, n *Node, tmpl *template.Template) (string, []string, error) {
+func (ti *TimelineIndex) Render(_ *Options, m *capsule.Model, n *capsule.Node, tmpl *template.Template) (string, []string, error) {
 	if v, found := m.Structures[ti.cfg.Id]; found {
 		if ts, ok := v.(*capsule.TimelineStructure); ok {
 			return ti.renderTimeline(ts, n, tmpl)
@@ -54,7 +54,7 @@ func (ti *TimelineIndex) Render(_ *Options, m *capsule.Model, n *Node, tmpl *tem
 	}
 }
 
-func (ti *TimelineIndex) renderTimeline(ts *capsule.TimelineStructure, n *Node, tmpl *template.Template) (string, []string, error) {
+func (ti *TimelineIndex) renderTimeline(ts *capsule.TimelineStructure, n *capsule.Node, tmpl *template.Template) (string, []string, error) {
 	buf := new(bytes.Buffer)
 	if err := tmpl.ExecuteTemplate(buf, ti.cfg.Template, &timelineModel{n, ts}); err == nil {
 		return buf.String(), nil, nil
@@ -64,6 +64,6 @@ func (ti *TimelineIndex) renderTimeline(ts *capsule.TimelineStructure, n *Node, 
 }
 
 type timelineModel struct {
-	IndexNode *Node
+	IndexNode *capsule.Node
 	Timeline  *capsule.TimelineStructure
 }
