@@ -6,13 +6,13 @@ import (
 	"html/template"
 )
 
-type renderResult struct {
+type RenderResult struct {
 	Body  string
 	Paths []string
 }
 
 type Renderer interface {
-	Render(opt *Options, m *capsule.Model, n *capsule.Node, t *template.Template) (*renderResult, error)
+	Render(opt *Options, m *capsule.Model, n *capsule.Node, t *template.Template) (*RenderResult, error)
 }
 
 func RegisterRenderer(id string, fs cf.FlexibleSetter) {

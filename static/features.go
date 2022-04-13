@@ -17,12 +17,12 @@ func init() {
 
 type FeaturesRenderer struct{}
 
-func (fr *FeaturesRenderer) Render(opt *Options, m *capsule.Model, n *capsule.Node, _ *template.Template) (*renderResult, error) {
+func (fr *FeaturesRenderer) Render(opt *Options, m *capsule.Model, n *capsule.Node, _ *template.Template) (*RenderResult, error) {
 	dstPaths, err := fr.copyFeatures(opt, m, n)
 	if err != nil {
 		return nil, err
 	}
-	return &renderResult{Paths: dstPaths}, nil
+	return &RenderResult{Paths: dstPaths}, nil
 }
 
 func (fr *FeaturesRenderer) copyFeatures(opt *Options, m *capsule.Model, n *capsule.Node) ([]string, error) {

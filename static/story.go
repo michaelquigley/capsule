@@ -19,7 +19,7 @@ func init() {
 
 type StoryRenderer struct{}
 
-func (sr *StoryRenderer) Render(_ *Options, m *capsule.Model, n *capsule.Node, tmpl *template.Template) (*renderResult, error) {
+func (sr *StoryRenderer) Render(_ *Options, m *capsule.Model, n *capsule.Node, tmpl *template.Template) (*RenderResult, error) {
 	stories := n.Features.With(capsule.Attributes{"role": "story", "class": "document"})
 	if len(stories) == 1 {
 		storyPath := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), stories[0].Name))
@@ -37,7 +37,7 @@ func (sr *StoryRenderer) Render(_ *Options, m *capsule.Model, n *capsule.Node, t
 
 		var buf bytes.Buffer
 		if err := tmpl.ExecuteTemplate(&buf, "renderers/story", mdBuf.String()); err == nil {
-			return &renderResult{buf.String(), nil}, nil
+			return &RenderResult{buf.String(), nil}, nil
 		}
 
 		return nil, err
