@@ -58,10 +58,12 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, err
 	if renderers, err := cc.renderersForNode(n); err == nil {
 		for _, renderer := range renderers {
 			logrus.Debugf("'%v' => %v", n.FullPath(), reflect.TypeOf(renderer))
-			out, rendererPaths, err := renderer.Render(cc.opt, m, n, cc.r.tmpl)
+			result, err := renderer.Render(cc.opt, m, n, cc.r.t)
 			if err == nil {
-				n.SetV("body", n.VString("body")+out)
-				dstPaths = append(dstPaths, rendererPaths...)
+				if result != nil {
+					n.SetV("body", n.VString("body")+result.Body)
+					dstPaths = append(dstPaths, result.Paths...)
+				}
 			} else {
 				return nil, err
 			}
@@ -70,7 +72,7 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, err
 		return nil, err
 	}
 
-	if err := cc.r.tmpl.ExecuteTemplate(f, "node", n); err != nil {
+	if err := cc.r.t.ExecuteTemplate(f, "node", n); err != nil {
 		return nil, err
 	}
 	logrus.Infof("=> '%v'", renderPath)

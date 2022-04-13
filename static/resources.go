@@ -12,7 +12,7 @@ import (
 )
 
 type resources struct {
-	tmpl     *template.Template
+	t        *template.Template
 	template map[string]string
 	body     map[string][]Renderer
 	statics  []string
@@ -50,8 +50,8 @@ func (r *resources) loadTemplates(opt *Options, m *capsule.Model) error {
 	if err != nil {
 		return errors.Wrap(err, "error loading templates")
 	}
-	if tmpl, err := template.New("").Funcs(funcMap(m)).ParseFiles(tpls...); err == nil {
-		r.tmpl = tmpl
+	if t, err := template.New("").Funcs(funcMap(m)).ParseFiles(tpls...); err == nil {
+		r.t = t
 	} else {
 		return errors.Wrap(err, "error parsing templates")
 	}

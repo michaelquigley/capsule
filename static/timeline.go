@@ -42,24 +42,24 @@ type TimelineIndex struct {
 	cfg *TimelineIndexConfig
 }
 
-func (ti *TimelineIndex) Render(_ *Options, m *capsule.Model, n *capsule.Node, tmpl *template.Template) (string, []string, error) {
+func (ti *TimelineIndex) Render(_ *Options, m *capsule.Model, n *capsule.Node, tmpl *template.Template) (*renderResult, error) {
 	if v, found := m.Structures[ti.cfg.Id]; found {
 		if ts, ok := v.(*capsule.TimelineStructure); ok {
 			return ti.renderTimeline(ts, n, tmpl)
 		} else {
-			return "", nil, errors.Errorf("invalid timeline structure type '%v'", reflect.TypeOf(v).Name())
+			return nil, errors.Errorf("invalid timeline structure type '%v'", reflect.TypeOf(v).Name())
 		}
 	} else {
-		return "", nil, errors.Errorf("missing timeline structure '%v'", ti.cfg.Id)
+		return nil, errors.Errorf("missing timeline structure '%v'", ti.cfg.Id)
 	}
 }
 
-func (ti *TimelineIndex) renderTimeline(ts *capsule.TimelineStructure, n *capsule.Node, tmpl *template.Template) (string, []string, error) {
+func (ti *TimelineIndex) renderTimeline(ts *capsule.TimelineStructure, n *capsule.Node, tmpl *template.Template) (*renderResult, error) {
 	buf := new(bytes.Buffer)
 	if err := tmpl.ExecuteTemplate(buf, ti.cfg.Template, &timelineModel{n, ts}); err == nil {
-		return buf.String(), nil, nil
+		return &renderResult{Body: buf.String()}, nil
 	} else {
-		return "", nil, err
+		return nil, err
 	}
 }
 
