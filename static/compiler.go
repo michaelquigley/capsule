@@ -1,6 +1,7 @@
 package static
 
 import (
+	"github.com/gobwas/glob"
 	"github.com/michaelquigley/capsule"
 	"github.com/sirupsen/logrus"
 	"io/fs"
@@ -8,6 +9,8 @@ import (
 	"path/filepath"
 	"reflect"
 )
+
+const bodyV = "body"
 
 type Options struct {
 	BuildPath    string
@@ -47,17 +50,20 @@ func (cc *compiler) Compile(m *capsule.Model) error {
 }
 
 func (cc *compiler) visitNode(m *capsule.Model, n *capsule.Node) error {
-	for _, v := range cc.r.visitors {
-		visitor := v.(Visitor)
-
-		logrus.Debugf("visiting with '%v'", reflect.TypeOf(visitor).Name())
-		if err := visitor.Visit(m, n); err != nil {
-			return err
-		}
-	}
 	for _, child := range n.Children {
 		if err := cc.visitNode(m, child); err != nil {
 			return err
+		}
+	}
+	for gstr, visitor := range cc.r.visitors {
+		g, err := glob.Compile(gstr, '/')
+		if err != nil {
+			return err
+		}
+		if g.Match(n.FullPath()) {
+			if err := visitor.Visit(m, n, cc.r.t); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -91,7 +97,11 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, err
 		return nil, err
 	}
 
-	if err := cc.r.t.ExecuteTemplate(f, "node", n); err != nil {
+	template, err := cc.templateForNode(n)
+	if err != nil {
+		return nil, err
+	}
+	if err := cc.r.t.ExecuteTemplate(f, template, n); err != nil {
 		return nil, err
 	}
 	logrus.Infof("=> '%v'", renderPath)
@@ -110,11 +120,40 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, err
 
 func (cc *compiler) renderersForNode(n *capsule.Node) ([]Renderer, error) {
 	if cc.r.body != nil {
-		if renderers, found := cc.r.body[n.FullPath()]; found {
+		var renderers []Renderer
+		for globStr, renderer := range cc.r.body {
+			g, err := glob.Compile(globStr, '/')
+			if err != nil {
+				return nil, err
+			}
+			if g.Match(n.FullPath()) {
+				renderers = append(renderers, renderer)
+			}
+		}
+		if len(renderers) > 0 {
 			return renderers, nil
 		}
 	}
 	return []Renderer{&FeaturesRenderer{}}, nil
+}
+
+func (cc *compiler) templateForNode(n *capsule.Node) (string, error) {
+	if cc.r.template != nil {
+		var template = ""
+		for gstr, t := range cc.r.template {
+			g, err := glob.Compile(gstr, '/')
+			if err != nil {
+				return "", err
+			}
+			if g.Match(n.FullPath()) {
+				template = t
+			}
+		}
+		if template != "" {
+			return template, nil
+		}
+	}
+	return "node", nil
 }
 
 func (cc *compiler) clean(buildPaths []string) error {

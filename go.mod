@@ -5,6 +5,7 @@ go 1.18
 //replace github.com/michaelquigley/cf => ../cf
 
 require (
+	github.com/gobwas/glob v0.2.3
 	github.com/michaelquigley/cf v0.0.12
 	github.com/michaelquigley/pfxlog v0.6.9
 	github.com/pkg/errors v0.9.1

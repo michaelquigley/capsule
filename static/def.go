@@ -6,7 +6,12 @@ import (
 )
 
 type VisitorDef struct {
-	Visitors []interface{}
+	Visit []*PathDef
+}
+
+type PathDef struct {
+	Glob string
+	Impl interface{}
 }
 
 func LoadVisitorDef(path string) (*VisitorDef, error) {
@@ -25,13 +30,13 @@ func LoadVisitorDef(path string) (*VisitorDef, error) {
 }
 
 type RenderDef struct {
-	Render []*PathDef
+	Render   []*PathDef
+	Template []*TemplatePathDef
 }
 
-type PathDef struct {
-	Path     string
+type TemplatePathDef struct {
+	Glob     string
 	Template string
-	Body     []interface{}
 }
 
 func LoadRenderDef(path string) (*RenderDef, error) {

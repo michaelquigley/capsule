@@ -13,9 +13,9 @@ import (
 
 type resources struct {
 	t        *template.Template
+	visitors map[string]Visitor
 	template map[string]string
-	visitors []Visitor
-	body     map[string][]Renderer
+	body     map[string]Renderer
 	statics  []string
 }
 
@@ -74,8 +74,11 @@ func (r *resources) loadVisitorYaml(opt *Options) error {
 		return err
 	}
 	if def, err := LoadVisitorDef(visitorYamlPath); err == nil {
-		for _, visitor := range def.Visitors {
-			r.visitors = append(r.visitors, visitor.(Visitor))
+		for _, visitorDef := range def.Visit {
+			if r.visitors == nil {
+				r.visitors = make(map[string]Visitor)
+			}
+			r.visitors[visitorDef.Glob] = visitorDef.Impl.(Visitor)
 		}
 	} else {
 		return err
@@ -94,23 +97,18 @@ func (r *resources) loadRenderYaml(opt *Options) error {
 		return err
 	}
 	if def, err := LoadRenderDef(renderYamlPath); err == nil {
-		for _, entry := range def.Render {
-			if entry.Template != "" {
-				if r.template == nil {
-					r.template = make(map[string]string)
-				}
-				r.template[entry.Path] = entry.Template
+		for _, templateDef := range def.Template {
+			if r.template == nil {
+				r.template = make(map[string]string)
 			}
-			if len(entry.Body) > 0 {
-				if r.body == nil {
-					r.body = make(map[string][]Renderer)
-				}
-				var renderers []Renderer
-				for _, v := range entry.Body {
-					renderers = append(renderers, v.(Renderer))
-				}
-				r.body[entry.Path] = renderers
+			r.template[templateDef.Glob] = templateDef.Template
+		}
+		for _, renderDef := range def.Render {
+			logrus.Infof("glob '%v'", renderDef.Glob)
+			if r.body == nil {
+				r.body = make(map[string]Renderer)
 			}
+			r.body[renderDef.Glob] = renderDef.Impl.(Renderer)
 		}
 	} else {
 		return err

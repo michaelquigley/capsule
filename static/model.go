@@ -7,7 +7,7 @@ import (
 )
 
 type Visitor interface {
-	Visit(m *capsule.Model, n *capsule.Node) error
+	Visit(m *capsule.Model, n *capsule.Node, t *template.Template) error
 }
 
 func RegisterVisitor(id string, fs cf.FlexibleSetter) {

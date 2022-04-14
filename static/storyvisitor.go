@@ -4,24 +4,45 @@ import (
 	"bytes"
 	"github.com/michaelquigley/capsule"
 	"github.com/michaelquigley/cf"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/yuin/goldmark"
+	"html/template"
 	"os"
 	"path/filepath"
 )
 
 func init() {
 	RegisterVisitor("story", func(v interface{}, opt *cf.Options) (interface{}, error) {
-		return &StoryVisitor{}, nil
+		cfg := DefaultStoryVisitorConfig()
+		if data, ok := v.(map[string]interface{}); ok {
+			if err := cf.Bind(cfg, data, opt); err == nil {
+				return &storyVisitor{cfg}, nil
+			} else {
+				return nil, err
+			}
+		} else {
+			return nil, errors.Errorf("invalid configuration data for story (%v)", v)
+		}
 	})
 }
 
-type StoryVisitor struct{}
+type storyVisitorConfig struct {
+	Template string
+}
 
-func (sv *StoryVisitor) Visit(m *capsule.Model, n *capsule.Node) error {
+func DefaultStoryVisitorConfig() *storyVisitorConfig {
+	return &storyVisitorConfig{"renderers/story"}
+}
+
+type storyVisitor struct {
+	cfg *storyVisitorConfig
+}
+
+func (sv *storyVisitor) Visit(m *capsule.Model, n *capsule.Node, t *template.Template) error {
 	storyFeatures := n.Features.With(capsule.Attributes{"role": "story", "class": "document"})
 	if len(storyFeatures) == 1 {
-		logrus.Infof("visiting '%v'", n.FullPath())
+		logrus.Debugf("visiting '%v'", n.FullPath())
 		storyPath := filepath.ToSlash(filepath.Join(m.Path, n.FullPath(), storyFeatures[0].Name))
 		logrus.Debugf("story path = '%v'", storyPath)
 
@@ -35,9 +56,13 @@ func (sv *StoryVisitor) Visit(m *capsule.Model, n *capsule.Node) error {
 			return err
 		}
 
-		body := n.VString("body") + mdBuf.String()
-		n.SetV("body", body)
-		logrus.Infof("new body '%v'", body)
+		buf := new(bytes.Buffer)
+		if err := t.ExecuteTemplate(buf, sv.cfg.Template, mdBuf.String()); err != nil {
+			return err
+		}
+
+		body := n.VString(bodyV) + buf.String()
+		n.SetV(bodyV, body)
 	}
 
 	logrus.Debugf("no single story to render on '%v'", n.FullPath())
