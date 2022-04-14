@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	RegisterRenderer("timeline/index", func(v interface{}, opt *cf.Options) (interface{}, error) {
+	RegisterVisitor("timeline/index", func(v interface{}, opt *cf.Options) (interface{}, error) {
 		cfg := DefaultTimelineIndexConfig()
 		if data, ok := v.(map[string]interface{}); ok {
 			if err := cf.Bind(cfg, data, opt); err == nil {
@@ -42,7 +42,7 @@ type TimelineIndex struct {
 	cfg *TimelineIndexConfig
 }
 
-func (ti *TimelineIndex) Render(_ *Options, m *capsule.Model, n *capsule.Node, tmpl *template.Template) (*RenderResult, error) {
+func (ti *TimelineIndex) Visit(m *capsule.Model, n *capsule.Node, tmpl *template.Template) (*RenderResult, error) {
 	if v, found := m.Structures[ti.cfg.Id]; found {
 		if ts, ok := v.(*capsule.TimelineStructure); ok {
 			return ti.renderTimeline(ts, n, tmpl)

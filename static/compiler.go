@@ -81,7 +81,6 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, err
 			result, err := renderer.Render(cc.opt, m, n, cc.r.t)
 			if err == nil {
 				if result != nil {
-					n.SetV("body", n.VString("body")+result.Body)
 					dstPaths = append(dstPaths, result.Paths...)
 				}
 			} else {
@@ -115,7 +114,7 @@ func (cc *compiler) renderersForNode(n *capsule.Node) ([]Renderer, error) {
 			return renderers, nil
 		}
 	}
-	return []Renderer{&StoryRenderer{}, &FeaturesRenderer{}}, nil
+	return []Renderer{&FeaturesRenderer{}}, nil
 }
 
 func (cc *compiler) clean(buildPaths []string) error {
