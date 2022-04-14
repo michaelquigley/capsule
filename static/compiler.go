@@ -84,10 +84,10 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, err
 	if renderers, err := cc.renderersForNode(n); err == nil {
 		for _, renderer := range renderers {
 			logrus.Debugf("'%v' => %v", n.FullPath(), reflect.TypeOf(renderer))
-			result, err := renderer.Render(cc.opt, m, n, cc.r.t)
+			rendererPaths, err := renderer.Render(cc.opt, m, n, cc.r.t)
 			if err == nil {
-				if result != nil {
-					dstPaths = append(dstPaths, result.Paths...)
+				if rendererPaths != nil {
+					dstPaths = append(dstPaths, rendererPaths...)
 				}
 			} else {
 				return nil, err

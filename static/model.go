@@ -17,13 +17,8 @@ func RegisterVisitor(id string, fs cf.FlexibleSetter) {
 	visitorRegistry[id] = fs
 }
 
-type RenderResult struct {
-	Body  string
-	Paths []string
-}
-
 type Renderer interface {
-	Render(opt *Options, m *capsule.Model, n *capsule.Node, t *template.Template) (*RenderResult, error)
+	Render(opt *Options, m *capsule.Model, n *capsule.Node, t *template.Template) ([]string, error)
 }
 
 func RegisterRenderer(id string, fs cf.FlexibleSetter) {
