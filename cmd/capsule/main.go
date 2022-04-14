@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "github.com/michaelquigley/capsule/static/visitors"
 	"github.com/michaelquigley/pfxlog"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

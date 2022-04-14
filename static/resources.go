@@ -14,6 +14,7 @@ import (
 type resources struct {
 	t        *template.Template
 	template map[string]string
+	visitors []Visitor
 	body     map[string][]Renderer
 	statics  []string
 }
@@ -21,10 +22,14 @@ type resources struct {
 const renderYaml = "render.yaml"
 const staticRoot = "static"
 const templatesRoot = "templates"
+const visitorYaml = "visitor.yaml"
 
 func loadResources(opt *Options, m *capsule.Model) (*resources, error) {
 	r := &resources{}
 	if err := r.loadTemplates(opt, m); err != nil {
+		return nil, err
+	}
+	if err := r.loadVisitorYaml(opt); err != nil {
 		return nil, err
 	}
 	if err := r.loadRenderYaml(opt); err != nil {
@@ -58,8 +63,28 @@ func (r *resources) loadTemplates(opt *Options, m *capsule.Model) error {
 	return nil
 }
 
+func (r *resources) loadVisitorYaml(opt *Options) error {
+	visitorYamlPath := filepath.ToSlash(filepath.Join(opt.ResourcePath, visitorYaml))
+	_, err := os.Stat(visitorYamlPath)
+	if os.IsNotExist(err) {
+		logrus.Warnf("no %v loaded", visitorYamlPath)
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if def, err := LoadVisitorDef(visitorYamlPath); err == nil {
+		for _, visitor := range def.Visitors {
+			r.visitors = append(r.visitors, visitor.(Visitor))
+		}
+	} else {
+		return err
+	}
+	return nil
+}
+
 func (r *resources) loadRenderYaml(opt *Options) error {
-	renderYamlPath := filepath.Join(opt.ResourcePath, renderYaml)
+	renderYamlPath := filepath.ToSlash(filepath.Join(opt.ResourcePath, renderYaml))
 	_, err := os.Stat(renderYamlPath)
 	if os.IsNotExist(err) {
 		logrus.Warnf("no %v loaded", renderYamlPath)

@@ -6,6 +6,17 @@ import (
 	"html/template"
 )
 
+type Visitor interface {
+	Visit(m *capsule.Model, n *capsule.Node) error
+}
+
+func RegisterVisitor(id string, fs cf.FlexibleSetter) {
+	if visitorRegistry == nil {
+		visitorRegistry = make(map[string]cf.FlexibleSetter)
+	}
+	visitorRegistry[id] = fs
+}
+
 type RenderResult struct {
 	Body  string
 	Paths []string
@@ -22,4 +33,5 @@ func RegisterRenderer(id string, fs cf.FlexibleSetter) {
 	rendererRegistry[id] = fs
 }
 
+var visitorRegistry map[string]cf.FlexibleSetter
 var rendererRegistry map[string]cf.FlexibleSetter

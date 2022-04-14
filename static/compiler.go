@@ -29,6 +29,9 @@ func (cc *compiler) Compile(m *capsule.Model) error {
 		return err
 	}
 	cc.r = r
+	if err := cc.visitNode(m, m.Root); err != nil {
+		return err
+	}
 	staticPaths, err := cc.r.build(cc.opt)
 	if err != nil {
 		return err
@@ -39,6 +42,23 @@ func (cc *compiler) Compile(m *capsule.Model) error {
 	}
 	if err := cc.clean(append(staticPaths, renderPaths...)); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (cc *compiler) visitNode(m *capsule.Model, n *capsule.Node) error {
+	for _, v := range cc.r.visitors {
+		visitor := v.(Visitor)
+
+		logrus.Debugf("visiting with '%v'", reflect.TypeOf(visitor).Name())
+		if err := visitor.Visit(m, n); err != nil {
+			return err
+		}
+	}
+	for _, child := range n.Children {
+		if err := cc.visitNode(m, child); err != nil {
+			return err
+		}
 	}
 	return nil
 }

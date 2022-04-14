@@ -5,6 +5,25 @@ import (
 	"github.com/pkg/errors"
 )
 
+type VisitorDef struct {
+	Visitors []interface{}
+}
+
+func LoadVisitorDef(path string) (*VisitorDef, error) {
+	def := &VisitorDef{}
+
+	options := cf.DefaultOptions()
+	for k, v := range visitorRegistry {
+		options.AddFlexibleSetter(k, v)
+	}
+
+	if err := cf.BindYaml(def, path, options); err != nil {
+		return nil, errors.Wrapf(err, "error loading visitor definition from '%v' (%v)", path, err)
+	}
+
+	return def, nil
+}
+
 type RenderDef struct {
 	Render []*PathDef
 }
