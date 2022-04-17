@@ -5,13 +5,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-type VisitorDef struct {
-	Visit []*PathDef
-}
-
 type PathDef struct {
 	Glob string
-	Impl interface{}
+	Impl []interface{}
+}
+
+type VisitorDef struct {
+	Visit []*PathDef
 }
 
 func LoadVisitorDef(path string) (*VisitorDef, error) {
@@ -30,13 +30,7 @@ func LoadVisitorDef(path string) (*VisitorDef, error) {
 }
 
 type RenderDef struct {
-	Render   []*PathDef
-	Template []*TemplatePathDef
-}
-
-type TemplatePathDef struct {
-	Glob     string
-	Template string
+	Render []*PathDef
 }
 
 func LoadRenderDef(path string) (*RenderDef, error) {

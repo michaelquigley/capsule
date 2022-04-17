@@ -55,14 +55,16 @@ func (cc *compiler) visitNode(m *capsule.Model, n *capsule.Node) error {
 			return err
 		}
 	}
-	for gstr, visitor := range cc.r.visitors {
+	for gstr, visitors := range cc.r.visitors {
 		g, err := glob.Compile(gstr, '/')
 		if err != nil {
 			return err
 		}
 		if g.Match(n.FullPath()) {
-			if err := visitor.Visit(m, n, cc.r.t); err != nil {
-				return err
+			for _, visitor := range visitors {
+				if err := visitor.Visit(m, n, cc.r.t); err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -71,15 +73,6 @@ func (cc *compiler) visitNode(m *capsule.Model, n *capsule.Node) error {
 
 func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, error) {
 	var dstPaths []string
-
-	renderPath := filepath.ToSlash(filepath.Join(cc.opt.BuildPath, n.FullPath(), "index.html"))
-	if err := os.MkdirAll(filepath.Dir(renderPath), os.ModePerm); err != nil {
-		return nil, err
-	}
-	f, err := os.Create(renderPath)
-	if err != nil {
-		return nil, err
-	}
 
 	if renderers, err := cc.renderersForNode(n); err == nil {
 		for _, renderer := range renderers {
@@ -97,16 +90,6 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, err
 		return nil, err
 	}
 
-	template, err := cc.templateForNode(n)
-	if err != nil {
-		return nil, err
-	}
-	if err := cc.r.t.ExecuteTemplate(f, template, n); err != nil {
-		return nil, err
-	}
-	logrus.Infof("=> '%v'", renderPath)
-	dstPaths = append(dstPaths, filepath.Join(n.FullPath(), "index.html"))
-
 	for _, cn := range n.Children {
 		childPaths, err := cc.renderNode(cn, m)
 		if err != nil {
@@ -119,41 +102,20 @@ func (cc *compiler) renderNode(n *capsule.Node, m *capsule.Model) ([]string, err
 }
 
 func (cc *compiler) renderersForNode(n *capsule.Node) ([]Renderer, error) {
+	var allRenderers []Renderer
 	if cc.r.body != nil {
-		var renderers []Renderer
-		for globStr, renderer := range cc.r.body {
+		for globStr, renderers := range cc.r.body {
 			g, err := glob.Compile(globStr, '/')
 			if err != nil {
 				return nil, err
 			}
 			if g.Match(n.FullPath()) {
-				renderers = append(renderers, renderer)
+				allRenderers = append(allRenderers, renderers...)
 			}
-		}
-		if len(renderers) > 0 {
-			return renderers, nil
 		}
 	}
-	return []Renderer{&FeaturesRenderer{}}, nil
-}
-
-func (cc *compiler) templateForNode(n *capsule.Node) (string, error) {
-	if cc.r.template != nil {
-		var template = ""
-		for gstr, t := range cc.r.template {
-			g, err := glob.Compile(gstr, '/')
-			if err != nil {
-				return "", err
-			}
-			if g.Match(n.FullPath()) {
-				template = t
-			}
-		}
-		if template != "" {
-			return template, nil
-		}
-	}
-	return "node", nil
+	logrus.Debugf("selected %d renderers for '%v'", len(allRenderers), n.FullPath())
+	return allRenderers, nil
 }
 
 func (cc *compiler) clean(buildPaths []string) error {
