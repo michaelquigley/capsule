@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type resources struct {
@@ -42,24 +43,28 @@ func loadResources(opt *Options, m *capsule.Model) (*resources, error) {
 }
 
 func (r *resources) loadTemplates(opt *Options, m *capsule.Model) error {
-	var tpls []string
+	t := template.New("").Funcs(funcMap(m))
 	err := fs.WalkDir(os.DirFS(filepath.Join(opt.ResourcePath, templatesRoot)), ".", func(path string, de fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if filepath.Ext(path) == ".gohtml" {
-			tpls = append(tpls, filepath.ToSlash(filepath.Join(opt.ResourcePath, templatesRoot, path)))
+			name := strings.TrimSuffix(path, filepath.Ext(path))
+			data, err := os.ReadFile(filepath.Join(opt.ResourcePath, templatesRoot, path))
+			if err != nil {
+				return errors.Wrapf(err, "error reading template '%v'", path)
+			}
+			t, err = t.New(name).Parse(string(data))
+			if err != nil {
+				return errors.Wrapf(err, "error parsing template '%v'", path)
+			}
 		}
 		return nil
 	})
 	if err != nil {
 		return errors.Wrap(err, "error loading templates")
 	}
-	if t, err := template.New("").Funcs(funcMap(m)).ParseFiles(tpls...); err == nil {
-		r.t = t
-	} else {
-		return errors.Wrap(err, "error parsing templates")
-	}
+	r.t = t
 	return nil
 }
 
