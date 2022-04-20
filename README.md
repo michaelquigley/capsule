@@ -4,19 +4,19 @@
 
 `capsule` provides solutions for _content authors_ to compose, curate, and publish collections of structured content as coherent publications. `capsule` has a specific focus on the indie web, and independent, non-platform publications.
 
-`capsule` provides a programming framework, which allows _software developers_ to create and extend solutions in an organized, uniform manner with good encapsulation properties. `capsule` is implemented in clean, modern, idiomatic golang.
+`capsule` provides a programming framework, which allows _software developers_ to create and extend solutions in an organized, uniform manner with beneficial properties. `capsule` is implemented in clean, modern, idiomatic golang.
 
 `capsule` is intended to be format agnostic. Use the same content collection to publish into a multiplicity of formats.
 
-Use `capsule` when you need structure around your content workflow, but don't want a heavyweight content management system, and when a static site generator alone isn't quite enough.
+Use `capsule` when you want structure around your content workflow, but don't want a heavyweight content management system. Use `capsule` when a static site generator alone isn't quite enough.
 
 ## Capsules
 
 In the `capsule` universe, we refer to a single "content repository" as a _capsule_. At this time, the concept of a capsule is more or less aligned with a single "publication", but this decision is not necessarily important to the framework.
 
-The default content model included with `capsule` is a simple implementation built around a conventional filesystem tree. Filesystem primitives such as hierarchical directories, files, and file extensions are used along with `capsule`-specific conventions allowing content authors to encode semantic structure into their content.
+The default content model included with `capsule` is a simple implementation built around a conventional filesystem tree. Filesystem primitives such as hierarchical directories, files, and file extensions are used along with `capsule`-specific conventions allowing content authors to encode semantic meaning into their content.
 
-The default filesystem-based capsule model will work on any reasonable computer system. Use a Raspberry Pi to manage your content workflow.
+The default filesystem-based capsule model is extremely lightweight, and will work on any reasonable computer system. Use a Raspberry Pi to manage your content workflow.
 
 ## Interfaces
 
@@ -26,25 +26,25 @@ The default filesystem-based capsule model will work on any reasonable computer 
 
 * around the programming model used to operate on capsules, such that developers have a coherent set of abstractions that can be used to develop tooling and systems that operate on disparate capsules in a uniform way
 
-* around the stock publishing toolkit and its extension points
+* around the static web compiler, it's toolkit and its extension points
 
-* that allow for clean specialization through extension; developers *will not* have to create forks of `capsule` just to maintain their own customizations. Use capsule like an extensible framework
+* that allow for clean specialization through extension; developers *will not* have to create forks of `capsule` just to maintain their own customizations; use capsule like an extensible framework
 
 ## Meta-structures
 
 The `capsule` framework provides first-class support for _meta-structures_. Meta-structures are programmatically generated content derived from the concrete content contained within the capsule.
 
-Content objects like tables of contents, indexes, search databases, or timelines would be examples of meta-structures. `capsule` provides framework interfaces for generating meta-structures within the framework, making those available downstream within content workflows such that they can be represented independently for different publishing formats.
+Generate tables of contents, indexes, search databases, or timelines, injecting those into the model cleanly so that they can be consumed by downstream publishing components, which bind them into a presentation.
 
 Easily extend `capsule` with any kind of meta-structure you can imagine.
 
 ## The Filesystem
 
-Using the filesystem as a facility for managing content objects allows content authors to work with any reasonable tooling for both creating content, and also for managing versions of capsules.
+Using the filesystem as a facility for managing content objects allows content authors to work with pretty much any kind of tooling for both creating content, and also for managing versions of capsules.
 
 A tool like `git` (with LFS support enabled) could be used to manage versions of objects in a capsule. Any solution that can manage trees of files will be suitable for managing the versioned state of a capsule.
 
-Like most other parts of `capsule`, if you want to use a different type of repository implementation you can replace the stock implementation through clean interfaces with well-defined semantics.
+Like most other parts of `capsule`, if you want to use a different type of repository implementation you can replace the reference filesystem implementation through clean interfaces with well-defined semantics.
 
 ### Filesystem Primitives
 
@@ -60,7 +60,7 @@ In the filesystem implementation, nodes are represented by directories and featu
 
 ## Static Web Compiler
 
-`capsule` ships with a static web compiler reference implementation. The compiler is designed to be easily extensible to support multiple types of web structures ("blogs", "journals", "books", "wikis", "zettelkasten", etc.). The compiler itself provides interfaces separating its concerns and allowing for clean specialization through extension. A number of stock implementations and examples are included to make it easy to understand how to use `capsule` as the foundation for your own static web content strategy.
+`capsule` ships with a static web compiler reference implementation. The compiler is designed to be easily extensible to support multiple types of web structures ("blogs", "journals", "books", "wikis", "zettelkasten", etc.). The compiler itself provides interfaces separating its concerns and allowing for clean specialization through extension. A number of reference implementations and examples are included to make it easy to understand how to use `capsule` as the foundation for your own static web content strategy.
 
 By default, the static compiler uses a node within a capsule to represent a "page", and features to represent the structured prose documents, images, multimedia, and other assets that are unique to that page.
 
