@@ -2,7 +2,7 @@
 
 `capsule` is a software framework that defines an opinionated, extensible content management model.
 
-`capsule` provides solutions for _content authors_ to compose, curate, and publish collections of structured content as coherent publications. `capsule` has a specific focus on the indie web, and independent, non-platform publications.
+`capsule` provides solutions for _content authors_ to compose, curate, and publish collections of structured content as concrete publications. `capsule` has a specific focus on the indie web, and independent, non-platform publications.
 
 `capsule` provides a programming framework, which allows _software developers_ to create and extend solutions in an organized, uniform manner with beneficial properties. `capsule` is implemented in clean, modern, idiomatic golang.
 
@@ -16,7 +16,7 @@ In the `capsule` universe, we refer to a single "content repository" as a _capsu
 
 The default content model included with `capsule` is a simple implementation built around a conventional filesystem tree. Filesystem primitives such as hierarchical directories, files, and file extensions are used along with `capsule`-specific conventions allowing content authors to build semantic meaning into their content.
 
-The default filesystem-based capsule model is extremely lightweight, and will work on any reasonable computer system. Use a Raspberry Pi to manage your content workflow.
+The default filesystem-based capsule model is extremely lightweight, and will work on any reasonable computer system. Use a Raspberry Pi to manage your content workflow. The sweet spot is a couple of folks collaborating on content, managed through a `git` repository, publishing to one or more web sites.
 
 ## Interfaces
 
