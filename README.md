@@ -1,49 +1,85 @@
 # capsule
 
-_(this is a work-in-progress)_
+`capsule` is a software framework that defines an opinionated, extensible content management model.
 
-`capsule` is a software framework that defines a publishing format, designed to contain structured prose writing and multi-media artifacts. A publication created using the `capsule` framework is referred to as "a capsule".
+`capsule` provides solutions for _content authors_ to compose, curate, and publish collections of structured content as coherent publications. `capsule` has a specific focus on the indie web, and independent, non-platform publications.
 
-Let's start with a picture:
+`capsule` provides a programming framework, which allows _software developers_ to create and extend solutions in an organized, uniform manner with good encapsulation properties. `capsule` is implemented in clean, modern, idiomatic golang.
+
+`capsule` is intended to be format agnostic. Use the same content collection to publish into a multiplicity of formats.
+
+Use `capsule` when you need structure around your content workflow, but don't want a heavyweight content management system, and when a static site generator alone isn't quite enough.
+
+## Capsules
+
+In the `capsule` universe, we refer to a single "content repository" as a _capsule_. At this time, the concept of a capsule is more or less aligned with a single "publication", but this decision is not necessarily important to the framework.
+
+The default content model included with `capsule` is a simple implementation built around a conventional filesystem tree. Filesystem primitives such as hierarchical directories, files, and file extensions are used along with `capsule`-specific conventions allowing content authors to encode semantic structure into their content.
+
+The default filesystem-based capsule model will work on any reasonable computer system. Use a Raspberry Pi to manage your content workflow.
+
+## Interfaces
+
+`capsule` provides interfaces:
+
+* around the filesystem structures defining a capsule, such that content authors have a stable representation to use in developing large, long-lived content repositories
+
+* around the programming model used to operate on capsules, such that developers have a coherent set of abstractions that can be used to develop tooling and systems that operate on disparate capsules in a uniform way
+
+* around the stock publishing toolkit and its extension points
+
+* that allow for clean specialization through extension; developers *will not* have to create forks of `capsule` just to maintain their own customizations. Use capsule like an extensible framework
+
+## Meta-structures
+
+The `capsule` framework provides first-class support for _meta-structures_. Meta-structures are programmatically generated content derived from the concrete content contained within the capsule.
+
+Content objects like tables of contents, indexes, search databases, or timelines would be examples of meta-structures. `capsule` provides framework interfaces for generating meta-structures within the framework, making those available downstream within content workflows such that they can be represented independently for different publishing formats.
+
+Easily extend `capsule` with any kind of meta-structure you can imagine.
+
+## The Filesystem
+
+Using the filesystem as a facility for managing content objects allows content authors to work with any reasonable tooling for both creating content, and also for managing versions of capsules.
+
+A tool like `git` (with LFS support enabled) could be used to manage versions of objects in a capsule. Any solution that can manage trees of files will be suitable for managing the versioned state of a capsule.
+
+Like most other parts of `capsule`, if you want to use a different type of repository implementation you can replace the stock implementation through clean interfaces with well-defined semantics.
+
+### Filesystem Primitives
+
+`capsule` leverages the filesystem to represent a capsule as a hierarchical tree of _nodes_. Nodes contain a multiplicity of _features_.
 
 ![anchor-feature](docs/images/anchor-feature.png)
 
-A capsule contains a multiplicity of hierarchical "anchors". Think of an anchor as performing in both the role of a "folder" and also as a "document". An anchor is a folder, in that it can contain other anchors. An anchor is a document in that it can be "displayed" or "rendered" and shown as an independent unit of "content".
+In the above image, `/`, `book/`, and `chapter 1/` all represent nodes. `(structure.json)`, `(picture.jpg)`, etc. all represent features.
 
-In the diagram above, `/`, `book/`, `chapter 1/`, etc. are all anchors.
+The implementer can decide if nodes should represent "pages" ("articles", "entries", etc.) or if nodes should represent larger structures like "chapters" or "books".
 
-The other items contained in the `chapter 1/` anchor (`picture.jpg`, `index.md`) are "features". Features are sub-components of the anchor that get combined into a presentation of the anchor. The anchor acts as an "namespace", containing all of the items related to that specific unit of content.
+In the filesystem implementation, nodes are represented by directories and features are represented by files inside that directory. This gives us a good starting point to build capsules right out of the box.
 
-This is intended to be abstract, with well-defined idioms. In a typical example where we're building a "blog" or a "journal", there will be a large number of peer anchors, one for each "entry" or "post". Each of those anchors will likely contain prose text in some structured format (markdown, gemtext), along with configuration, metadata, images, multimedia, binaries, or other artifacts. Rules built into the `capsule` framework will then define how the features are presented, based on default idioms, augmented with metadata expressed within the anchor to customize the behavior.
+## Static Web Compiler
 
-The picture also shows two anchors which contain features named `structure.json`. These are "structural directives". Structural directives describe in high-level the relationships between the anchors within the capsule. The structural directives are used by applications presenting capsule content to drive their presentation. You can think of the structural directives as an abstract representation of the navigational elements necessary to present the capsule.
+`capsule` ships with a static web compiler reference implementation. The compiler is designed to be easily extensible to support multiple types of web structures ("blogs", "journals", "books", "wikis", "zettelkasten", etc.). The compiler itself provides interfaces separating its concerns and allowing for clean specialization through extension. A number of stock implementations and examples are included to make it easy to understand how to use `capsule` as the foundation for your own static web content strategy.
 
-Structural directives describe things like, "this capsule contains a timeline of anchors". Or, "this capsule contains a graph of hypertext". Structural directives can apply to subsets of the capsule, hierarchically. This allows for different portions of the capsule namespace to follow different presentation rules.
+By default, the static compiler uses a node within a capsule to represent a "page", and features to represent the structured prose documents, images, multimedia, and other assets that are unique to that page.
 
-The ultimate goal of the `capsule` framework is to create a stable, simple, semantically-rich content format that can support multiple types of content development. Authors creating capsules should encounter minimal friction from the format or the tools. The capsule format should provide relatively flexible expressive power to allow the creation of varied content structures. This format should offer clean integration with a multitude of content-creation tools, in that it will be manifested as folders in a filesystem, containing files.
+## Changes to the Interfaces
 
-I intend to use `capsule` to provide myself with a publishing pipeline for my regular creative journal output, along with technical writing and technical research output for a number of projects. I would love to collaborate with other creatives and developers who find these ideas compelling and might want to use `capsule` in their own work.
+`capsule` will provide migration paths for both content authors and for developers. Content authors will have reasonable tooling from `capsule` to allow them to migrate their capsules from older idioms to newer idioms. Software developers will have framework support for managing code supporting multiple `capsule` versions.
 
-## Capsule Presentation
+It is an important property of `capsule` that capsule structures remain stable, such that those capsules will be supported many years into the future. `capsule` is intended to be a long-term solution for content creation, publishing, and archival.
 
-A capsule is intended to be a single source of truth for any number of presentations of the capsule's content. Initially, the `capsule` framework will ship with a set of "transpilers", which can create presentations targeting presentations for multiple formats. For example, there will definitely be a transpiler that can generate static HTML. There will likely be a transpiler that can produce a PDF. The transpiler framework will support extensibility by design, and will allow users of `capsule` to tailor the presentation to work for their unique requirements. Ultimately the content format and the idiomatic rules are the main concept, and users will be free to innovate tooling on top of those ideas.
+`capsule` is built upon the foundation of self-hosting, right-sized solutions, and the modern decentralized web. It aims to do this without sacrificing the right kinds of ergonomics for modern developers, and with a minimum of bloat.
 
-It's also on the roadmap to include a [Gemini][gemini] transpiler.
+## Roadmap
 
-### Capsule Browser
+I am developing `capsule` to be the foundation for my long-term content strategy across several different web sites and publications. As such, I'm naturally tailoring the development to suit my own use cases. Getting to a `v0.1`, which includes the first generation model containing the relevant meta-structures, and a reasonably-baked static web compiler are my main goals. I will be dogfooding these bits in my own workflows across a number of projects involving multiple people.
 
-Longer term, it might be useful to create a native `capsule`-based browser stack, and corresponding network layer. This approach would be similar to what [Gemini][gemini] has done. In the `capsule` universe, the structural directives end up dovetailing with the capabilities in these browsers, such that the users of capsules have more ultimate control over the layout and presentation of the content. The structural directives capture the semantics of the presentation, and the browser can provide extensive additional capabilities on top of those semantics.
+In a `v0.2` I would like to develop a reasonable compiler implementation that can re-target capsules into single-document formats, like PDF.
 
-A native capsule browser would allow capsules to live directly on the internet, and be presented without going through transpilation steps.
+It is also a target of interest to develop a compiler implementation targeting [Gemini][gemini].
 
-## Cryptographic Authenticity
-
-`capsule` will include support for cryptographically authenticating and signing content. I'm going to hand-wave this away for the time being until I've had some time to work through but... but the intention is to include native support in the format.
-
-## Future-Proofing
-
-What if we get to a point where we've invested a lot of time and effort into building capsules, and we decide we want to go somewhere else?
-
-We can just create a transpiler to port our capsules to whatever native formats we would like.
+I am actively interested in collaborators who are looking for a stable, modern, lightweight content management workflow.
 
 [gemini]: https://gemini.circumlunar.space/
