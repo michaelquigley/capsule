@@ -1,0 +1,9 @@
+{{ $children := childPaths . }}
+{{ if $children }}
+    <div>
+        <h2>Children:</h2>
+        {{ range $children }}
+            <p><a href="{{ . }}/index.html"><code>{{ . }}</code></a></p>
+        {{ end }}
+    </div>
+{{ end }}

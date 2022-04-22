@@ -1,0 +1,9 @@
+{{ $exports := exported . }}
+{{ if $exports }}
+    <div>
+        <h2>Features:</h2>
+        {{ range $exports }}
+            <p><a href="{{ .Name }}"><code>{{ .Name }}</code></a></p>
+        {{ end }}
+    </div>
+{{ end }}

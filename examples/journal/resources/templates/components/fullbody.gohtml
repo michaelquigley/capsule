@@ -1,0 +1,12 @@
+<body>
+<div class="layout">
+    <div class="container">
+        <div class="header">
+            <h1><a href="{{ relPath "index.html" . }}">Example Capsule</a></h1>
+        </div>
+        <div class="full">
+            {{ unescape (index .V "body") }}
+        </div>
+    </div>
+</div>
+</body>

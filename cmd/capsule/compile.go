@@ -29,7 +29,7 @@ func newCompileCommand() *compileCommand {
 		},
 	}
 	cc.cmd.Run = cc.run
-	cc.cmd.Flags().StringVarP(&cc.capsulePath, "capsule", "c", "src/", "capsule path")
+	cc.cmd.Flags().StringVarP(&cc.capsulePath, "capsule", "c", "capsule/", "capsule path")
 	cc.cmd.Flags().StringVarP(&cc.resourcePath, "resource", "r", "resources/", "resource path")
 	cc.cmd.Flags().StringVarP(&cc.buildPath, "build", "b", "build/", "build path")
 	return cc

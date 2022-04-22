@@ -1,0 +1,10 @@
+{{ $cur := . }}
+{{ $tl := timeline }}
+{{ if $tl.Nodes }}
+    <div>
+        <h2>Timeline</h2>
+        {{ range $tl.Nodes }}
+            <p><a href="{{ rel . $cur }}/index.html"><code>{{ .FullPath }}</code></a></p>
+        {{ end }}
+    </div>
+{{ end }}

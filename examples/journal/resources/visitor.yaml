@@ -1,0 +1,8 @@
+visit:
+  - glob:     .
+    impl:
+      - type: timelineindex
+
+  - glob:     entries/**
+    impl:
+      - type: story

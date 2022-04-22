@@ -1,0 +1,21 @@
+<body>
+<div class="layout">
+    <div class="container">
+        <div class="header">
+            <h1><a href="{{ relPath "index.html" . }}">Example Capsule</a></h1>
+        </div>
+        <div class="navigation">
+            {{ template "components/navigation/features" . }}
+            {{ template "components/navigation/timeline" . }}
+            {{ template "components/navigation/children" . }}
+            {{ template "components/navigation/parent" . }}
+            <div>
+                <code>{{ .FullPath }}</code>
+            </div>
+        </div>
+        <div class="content">
+            {{ unescape (index .V "body") }}
+        </div>
+    </div>
+</div>
+</body>

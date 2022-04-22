@@ -1,0 +1,11 @@
+render:
+  - glob:           .
+    impl:
+      - type:       story
+        template:   index
+
+  - glob:       entries/**
+    impl:
+      - type:       story
+        template:   node
+      - type:       features

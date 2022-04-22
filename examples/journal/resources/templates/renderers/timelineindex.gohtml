@@ -1,0 +1,13 @@
+{{ $cur := .IndexNode }}
+{{ with .Timeline }}
+    <div class="timeline">
+        {{ range .Nodes }}
+            <div class="card">
+                <h1><a href="{{ rel . $cur }}/index.html">{{ title . }}</a><br/></h1>
+                <p>
+                    {{ unescape (index .V "body") }}
+                </p>
+            </div>
+        {{ end }}
+    </div>
+{{ end }}
